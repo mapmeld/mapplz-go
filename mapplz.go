@@ -2,60 +2,36 @@ package mapplz
 
 import (
 	"encoding/json"
-	"github.com/kellydunn/golang-geo"
-	// "github.com/kpawlik/geojson"
 )
 
-type GeojsonPoint struct {
-	Coordinates []float64
+type MapItem interface {
+  Type()       string
+  Lat()        float64
+  Lng()        float64
+  Path()       [][][]float64
+  Properties() json.RawMessage
+  ToGeoJson()  string
 }
 
-type GeojsonLine struct {
-	Coordinates [][]float64
+func Add_LatLng(latlng []float64) MapItem {
+  mip := NewMapItemPoint(latlng[0], latlng[1])
+	return mip
 }
 
-type GeojsonPolygon struct {
-	Coordinates [][][]float64
-}
-
-type GeojsonGeometry struct {
-	Type        string
-	Coordinates json.RawMessage
-	Point       GeojsonPoint
-	Line        GeojsonLine
-	Polygon     GeojsonPolygon
-}
-
-type GeojsonFeature struct {
-	Type       string
-	Geometry   GeojsonGeometry
-	Properties json.RawMessage
-}
-
-type GeojsonFeatureCollection struct {
-	Type     string
-	Features []GeojsonFeature
-}
-
-func Add_LatLng(latlng []float64) *geo.Point {
-	pt := geo.NewPoint(latlng[0], latlng[1])
-	return pt
-}
-
-func Add_LngLat(lnglat []float64) *geo.Point {
+func Add_LngLat(lnglat []float64) MapItem {
 	return Add_Lat_Lng(lnglat[1], lnglat[0])
 }
 
-func Add_Lat_Lng(lat float64, lng float64) *geo.Point {
-	pt := geo.NewPoint(lat, lng)
-	return pt
+func Add_Lat_Lng(lat float64, lng float64) MapItem {
+	mip := NewMapItemPoint(lat, lng)
+	return mip
 }
 
-func Add_Lng_Lat(lng float64, lat float64) *geo.Point {
+func Add_Lng_Lat(lng float64, lat float64) MapItem {
 	return Add_Lat_Lng(lat, lng)
 }
 
-func Add_Geojson_Collection_Str(geojson []byte) GeojsonFeatureCollection {
+func Add_Geojson_Collection(geojson []byte) GeojsonFeatureCollection {
 	// GeoJSON parsing based on http://stackoverflow.com/a/15728702
 	var geojsonData GeojsonFeatureCollection
 	err := json.Unmarshal(geojson, &geojsonData)
@@ -83,7 +59,7 @@ func Add_Geojson_Collection_Str(geojson []byte) GeojsonFeatureCollection {
 	return geojsonData
 }
 
-func Add_Geojson_Feature_Str(geojson []byte) GeojsonFeature {
+func Add_Geojson_Feature(geojson []byte) GeojsonFeature {
 	// GeoJSON parsing based on http://stackoverflow.com/a/15728702
 	var geojsonData GeojsonFeature
 	err := json.Unmarshal(geojson, &geojsonData)
