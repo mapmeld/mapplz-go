@@ -4,6 +4,15 @@ import (
 	"encoding/json"
 )
 
+type MapPLZ struct {
+  MapItems   []MapItem
+}
+
+func NewMapPLZ() MapPLZ {
+  var mis = []MapItem{}
+  return MapPLZ{MapItems: mis}
+}
+
 type MapItem interface {
   Type()       string
   Lat()        float64
@@ -23,8 +32,14 @@ func Add_LngLat(lnglat []float64) MapItem {
 }
 
 func Add_Lat_Lng(lat float64, lng float64) MapItem {
+  mip := NewMapItemPoint(lat, lng)
+  return mip
+}
+
+func (mp MapPLZ) Add_Lat_Lng(lat float64, lng float64) (MapPLZ, MapItem) {
 	mip := NewMapItemPoint(lat, lng)
-	return mip
+  mp.MapItems = append(mp.MapItems, mip)
+	return mp, mip
 }
 
 func Add_Lng_Lat(lng float64, lat float64) MapItem {

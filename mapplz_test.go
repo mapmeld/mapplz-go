@@ -4,6 +4,14 @@ import (
 	"testing"
 )
 
+func TestMapstore(t *testing.T) {
+  mapstore := NewMapPLZ()
+  mapstore, pt := mapstore.Add_Lat_Lng(40, -70)
+  if(mapstore.MapItems[0].Lat() != pt.Lat()) {
+    t.Errorf("point not made")
+  }
+}
+
 func TestLatLngParams(t *testing.T) {
 	pt := Add_Lat_Lng(40, -70)
 	if pt.Lat() != 40 || pt.Lng() != -70 {
