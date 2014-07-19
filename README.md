@@ -18,13 +18,37 @@ Add_Lat_Lng, sending (lng, lat) would be Add_Lng_Lat, and sending a single param
 Adding some data:
 
 ```
-// add points
-mapplz.Add_Lat_Lng(40, -70)
-mapplz.Add_Lng_Lat(-70, 40)
-mapplz.Add_LatLng([40, -70])
+mapstore := mapplz.NewMapPLZ()
 
-// GeoJSON strings
-mapplz.Add_Geojson_Feature_Str(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`)
+// add points
+mapstore.Add_Lat_Lng(40, -70)
+mapstore.Add_Lng_Lat(-70, 40)
+mapstore.Add_LatLng([40, -70])
+
+// add lines
+mapstore.Add_LatLngPath([[40, -70], [50, 20]])
+
+// add polygons
+mapstore.Add_LatLngPoly([[40, -70], [50, 20], [40, 40], [40, -70]])
+
+// GeoJSON strings (points, lines, and polygons)
+mapstore.Add_Geojson_Feature(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`)
+```
+
+Each feature is added to the mapstore and returned as a MapItem
+
+```
+pt := mapstore.Add_Lat_Lng(40, -70)
+line := mapstore.Add_LatLngPath([[40, -70], [50, 20]])
+
+len(mapstore.MapItems) == 2
+
+pt.Lat() == 40
+pt.ToGeoJson() == `{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`
+
+line.Type() == "line"
+line.Path() == [[[40, -70], [50, 20]]]
+
 ```
 
 ## Packages
