@@ -1,6 +1,7 @@
 package mapplz
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -9,6 +10,26 @@ func TestMapstore(t *testing.T) {
 	mapstore.Add_Lat_Lng(40, -70)
 	if mapstore.MapItems[0].Lat() != 40 {
 		t.Errorf("point not made")
+	} else {
+		fmt.Printf("mapstore working")
+	}
+}
+
+func TestLatLngProperties(t *testing.T) {
+	mapstore := NewMapPLZ()
+	props := make(map[string]interface{})
+	props["color"] = "red"
+	pt := mapstore.Add_Lat_Lng_Properties(40, -70, props)
+	if pt.Properties()["color"] != "red" {
+		t.Errorf("pt property not set")
+	}
+}
+
+func TestLngLatJson(t *testing.T) {
+	mapstore := NewMapPLZ()
+	pt := mapstore.Add_Lng_Lat_Json(-70, 40, `{ "color": "#f00" }`)
+	if pt.Properties()["color"] != "#f00" {
+		t.Errorf("pt property not set")
 	}
 }
 
@@ -58,6 +79,16 @@ func TestLngLatPath(t *testing.T) {
 	}
 }
 
+func TestLngLatPathJson(t *testing.T) {
+	mapstore := NewMapPLZ()
+	linepts := [][]float64{{-70, 40}, {-110, 23.2}}
+
+	line := mapstore.Add_LngLatPath_Json(linepts, `{ "color": "#f00" }`)
+	if line.Properties()["color"] != "#f00" {
+		t.Errorf("properties not added to lnglat path")
+	}
+}
+
 func TestLatLngPoly(t *testing.T) {
 	mapstore := NewMapPLZ()
 	linepts := [][]float64{{40, -70}, {23.2, -110}}
@@ -80,7 +111,7 @@ func TestLngLatPoly(t *testing.T) {
 
 func TestGeojsonPoint(t *testing.T) {
 	mapstore := NewMapPLZ()
-	gj := []byte(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }`)
+	gj := `{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }`
 	pt := mapstore.Add_Geojson_Feature(gj)
 
 	if pt.Lat() != 40 || pt.Lng() != -70 {
@@ -90,7 +121,7 @@ func TestGeojsonPoint(t *testing.T) {
 
 func TestGeojsonProperties(t *testing.T) {
 	mapstore := NewMapPLZ()
-	gj := []byte(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }, "properties": { "color": "#0f0" } }`)
+	gj := `{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }, "properties": { "color": "#0f0" } }`
 	pt := mapstore.Add_Geojson_Feature(gj)
 
 	if pt.Properties()["color"] != "#0f0" {
@@ -100,7 +131,7 @@ func TestGeojsonProperties(t *testing.T) {
 
 func TestGeojsonLine(t *testing.T) {
 	mapstore := NewMapPLZ()
-	gj := []byte(`{ "type": "Feature", "geometry": { "type": "LineString", "coordinates": [[-70, 40], [-110, 32.1]] } }`)
+	gj := `{ "type": "Feature", "geometry": { "type": "LineString", "coordinates": [[-70, 40], [-110, 32.1]] } }`
 	line := mapstore.Add_Geojson_Feature(gj)
 
 	first_pt := line.Path()[0][0]
@@ -111,7 +142,7 @@ func TestGeojsonLine(t *testing.T) {
 
 func TestGeojsonPoly(t *testing.T) {
 	mapstore := NewMapPLZ()
-	gj := []byte(`{ "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [[[-70, 40], [-110, 32.1], [-90, 25], [-70, 40]]] } }`)
+	gj := `{ "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [[[-70, 40], [-110, 32.1], [-90, 25], [-70, 40]]] } }`
 	poly := mapstore.Add_Geojson_Feature(gj)
 
 	first_pt := poly.Path()[0][0]
@@ -122,7 +153,7 @@ func TestGeojsonPoly(t *testing.T) {
 
 func TestGeojsonFeatureCollection(t *testing.T) {
 	mapstore := NewMapPLZ()
-	gj := []byte(`{ "type": "FeatureCollection", "features": [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }]}`)
+	gj := `{ "type": "FeatureCollection", "features": [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }]}`
 	gj_fc := mapstore.Add_Geojson_Collection(gj)
 
 	if gj_fc.Features[0].Geometry.Point.Coordinates[0] != -70 || gj_fc.Features[0].Geometry.Point.Coordinates[1] != 40 {

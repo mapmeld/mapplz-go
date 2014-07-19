@@ -45,7 +45,7 @@ Each feature is added to the mapstore and returned as a MapItem
 
 ```
 pt := mapstore.Add_Lat_Lng(40, -70)
-line := mapstore.Add_LatLngPath([[40, -70], [50, 20]])
+line := mapstore.Add_LatLngPath_Json([[40, -70], [50, 20]], `{ "color": "red" }`)
 
 len(mapstore.MapItems) == 2
 // export all with mapstore.ToGeoJson()
@@ -55,7 +55,7 @@ pt.ToGeoJson() == `{ "type": "Feature", "geometry": { "type": "Point", "coordina
 
 line.Type() == "line"
 line.Path() == [[[40, -70], [50, 20]]]
-
+line.Properties()["color"]
 ```
 
 ## Packages

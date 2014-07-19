@@ -1,6 +1,7 @@
 package mapplz
 
 import (
+	"encoding/json"
 	"github.com/kellydunn/golang-geo"
 	gj "github.com/kpawlik/geojson"
 )
@@ -45,10 +46,16 @@ func (mip *MapItemLine) Path() [][][]float64 {
 	return path
 }
 
-func (mip *MapItemLine) AddProperties(props map[string]interface{}) {
+func (mip *MapItemLine) SetProperties(props map[string]interface{}) {
 	for key, value := range props {
 		mip.properties[key] = value
 	}
+}
+
+func (mip *MapItemLine) SetJsonProperties(props string) {
+	var prop_map = map[string]interface{}{}
+	json.Unmarshal([]byte(props), &prop_map)
+	mip.SetProperties(prop_map)
 }
 
 func (mip *MapItemLine) Properties() map[string]interface{} {
