@@ -12,8 +12,8 @@ it into a database.
 
 Go does not support method overloading, so you need to name the right function for
 your data. Parameters are separated by an underscore, so sending (lat, lng) would be
-Add_Lat_Lng, sending (lng, lat) would be Add_Lng_Lat, and sending a single parameter
-{lat, lng} is Add_LatLng.
+Add_Lat_Lng, sending (lng, lat) would be Add_Lng_Lat, and sending an array
+[lat, lng] is Add_LatLng.
 
 Adding some data:
 
@@ -23,7 +23,9 @@ mapstore := mapplz.NewMapPLZ()
 // add points
 mapstore.Add_Lat_Lng(40, -70)
 mapstore.Add_Lng_Lat(-70, 40)
-mapstore.Add_LatLng([40, -70])
+
+var latlng_array = []float64{40, -70}
+mapstore.Add_LatLng(latlng_array)
 
 // add lines
 mapstore.Add_LatLngPath([[40, -70], [50, 20]])
