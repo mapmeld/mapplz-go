@@ -2,6 +2,7 @@ package mapplz
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 type MapPLZ struct {
@@ -74,6 +75,13 @@ func (mp *MapPLZ) Add_LngLatPoly(lnglat_path [][]float64) MapItem {
 	return mp.Add_LatLngPoly(lnglat_path)
 }
 
+func (mp *MapPLZ) ToGeoJson() string {
+	var features = []string{}
+	for i := 0; i < len(mp.MapItems); i++ {
+		features = append(features, mp.MapItems[i].ToGeoJson())
+	}
+	return `{"type":"FeatureCollection","features":[` + strings.Join(features, ",") + `]}`
+}
 
 func (mp *MapPLZ) Add_Geojson_Collection(geojson []byte) GeojsonFeatureCollection {
 	// GeoJSON parsing based on http://stackoverflow.com/a/15728702

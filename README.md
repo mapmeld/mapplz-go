@@ -42,6 +42,7 @@ pt := mapstore.Add_Lat_Lng(40, -70)
 line := mapstore.Add_LatLngPath([[40, -70], [50, 20]])
 
 len(mapstore.MapItems) == 2
+// export all with mapstore.ToGeoJson()
 
 pt.Lat() == 40
 pt.ToGeoJson() == `{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`

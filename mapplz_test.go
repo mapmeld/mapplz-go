@@ -148,3 +148,12 @@ func TestGeojsonPolyExport(t *testing.T) {
 		t.Errorf("geojson output for line did not match")
 	}
 }
+
+func TestGeojsonAllExport(t *testing.T) {
+	mapstore := NewMapPLZ()
+	mapstore.Add_Lat_Lng(40, -70)
+	output := mapstore.ToGeoJson()
+	if output != `{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[-70,40]},"properties":null}]}` {
+		t.Errorf("geojson output for all MapItems did not match")
+	}
+}
