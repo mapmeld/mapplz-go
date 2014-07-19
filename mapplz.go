@@ -22,31 +22,60 @@ type MapItem interface {
   ToGeoJson()  string
 }
 
-func Add_LatLng(latlng []float64) MapItem {
+func (mp *MapPLZ) Add_LatLng(latlng []float64) MapItem {
   mip := NewMapItemPoint(latlng[0], latlng[1])
+	mp.MapItems = append(mp.MapItems, mip)
 	return mip
 }
 
-func Add_LngLat(lnglat []float64) MapItem {
-	return Add_Lat_Lng(lnglat[1], lnglat[0])
+func (mp *MapPLZ) Add_LngLat(lnglat []float64) MapItem {
+	return mp.Add_Lat_Lng(lnglat[1], lnglat[0])
 }
 
-func Add_Lat_Lng(lat float64, lng float64) MapItem {
-  mip := NewMapItemPoint(lat, lng)
-  return mip
-}
-
-func (mp MapPLZ) Add_Lat_Lng(lat float64, lng float64) (MapPLZ, MapItem) {
+func (mp *MapPLZ) Add_Lat_Lng(lat float64, lng float64) MapItem {
 	mip := NewMapItemPoint(lat, lng)
   mp.MapItems = append(mp.MapItems, mip)
-	return mp, mip
+	return mip
 }
 
-func Add_Lng_Lat(lng float64, lat float64) MapItem {
-	return Add_Lat_Lng(lat, lng)
+func (mp *MapPLZ) Add_Lng_Lat(lng float64, lat float64) MapItem {
+	return mp.Add_Lat_Lng(lat, lng)
 }
 
-func Add_Geojson_Collection(geojson []byte) GeojsonFeatureCollection {
+func (mp *MapPLZ) Add_LatLngPath(path [][]float64) MapItem {
+	ml := NewMapItemLine(path)
+	mp.MapItems = append(mp.MapItems, ml)
+	return ml
+}
+
+func (mp *MapPLZ) Add_LngLatPath(lnglat_path [][]float64) MapItem {
+	for i := 0; i < len(lnglat_path); i++ {
+		lat := lnglat_path[i][1]
+		lng := lnglat_path[i][0]
+		lnglat_path[i][0] = lat
+		lnglat_path[i][1] = lng
+	}
+	return mp.Add_LatLngPath(lnglat_path)
+}
+
+func (mp *MapPLZ) Add_LatLngPoly(path [][]float64) MapItem {
+	ml := NewMapItemPoly(path)
+	mp.MapItems = append(mp.MapItems, ml)
+	return ml
+}
+
+func (mp *MapPLZ) Add_LngLatPoly(lnglat_path [][]float64) MapItem {
+	for i := 0; i < len(lnglat_path); i++ {
+		lat := lnglat_path[i][1]
+		lng := lnglat_path[i][0]
+		lnglat_path[i][0] = lat
+		lnglat_path[i][1] = lng
+	}
+	return mp.Add_LatLngPoly(lnglat_path)
+}
+
+
+func (mp *MapPLZ) Add_Geojson_Collection(geojson []byte) GeojsonFeatureCollection {
 	// GeoJSON parsing based on http://stackoverflow.com/a/15728702
 	var geojsonData GeojsonFeatureCollection
 	err := json.Unmarshal(geojson, &geojsonData)
@@ -74,18 +103,22 @@ func Add_Geojson_Collection(geojson []byte) GeojsonFeatureCollection {
 	return geojsonData
 }
 
-func Add_Geojson_Feature(geojson []byte) GeojsonFeature {
+func (mp *MapPLZ) Add_Geojson_Feature(geojson []byte) MapItem {
 	// GeoJSON parsing based on http://stackoverflow.com/a/15728702
 	var geojsonData GeojsonFeature
 	err := json.Unmarshal(geojson, &geojsonData)
+	var mip MapItem
 
 	switch geojsonData.Geometry.Type {
 	case "Point":
 		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Point.Coordinates)
+		mip = mp.Add_LngLat(geojsonData.Geometry.Point.Coordinates)
 	case "LineString":
 		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Line.Coordinates)
+		mip = mp.Add_LngLatPath(geojsonData.Geometry.Line.Coordinates)
 	case "Polygon":
 		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Polygon.Coordinates)
+		mip = mp.Add_LngLatPoly(geojsonData.Geometry.Polygon.Coordinates[0])
 	default:
 		panic("Unsupported type")
 	}
@@ -94,5 +127,5 @@ func Add_Geojson_Feature(geojson []byte) GeojsonFeature {
 		panic("Failed to parse JSON string")
 	}
 
-	return geojsonData
+	return mip
 }
