@@ -6,25 +6,26 @@ import (
 )
 
 type MapPLZ struct {
-  MapItems   []MapItem
+	MapItems []MapItem
 }
 
 func NewMapPLZ() MapPLZ {
-  var mis = []MapItem{}
-  return MapPLZ{MapItems: mis}
+	var mis = []MapItem{}
+	return MapPLZ{MapItems: mis}
 }
 
 type MapItem interface {
-  Type()       string
-  Lat()        float64
-  Lng()        float64
-  Path()       [][][]float64
-  Properties() json.RawMessage
-  ToGeoJson()  string
+	Type() string
+	Lat() float64
+	Lng() float64
+	Path() [][][]float64
+	AddProperties(map[string]interface{})
+	Properties() map[string]interface{}
+	ToGeoJson() string
 }
 
 func (mp *MapPLZ) Add_LatLng(latlng []float64) MapItem {
-  mip := NewMapItemPoint(latlng[0], latlng[1])
+	mip := NewMapItemPoint(latlng[0], latlng[1])
 	mp.MapItems = append(mp.MapItems, mip)
 	return mip
 }
@@ -35,7 +36,7 @@ func (mp *MapPLZ) Add_LngLat(lnglat []float64) MapItem {
 
 func (mp *MapPLZ) Add_Lat_Lng(lat float64, lng float64) MapItem {
 	mip := NewMapItemPoint(lat, lng)
-  mp.MapItems = append(mp.MapItems, mip)
+	mp.MapItems = append(mp.MapItems, mip)
 	return mip
 }
 
@@ -134,6 +135,8 @@ func (mp *MapPLZ) Add_Geojson_Feature(geojson []byte) MapItem {
 	if err != nil {
 		panic("Failed to parse JSON string")
 	}
+
+	mip.AddProperties(geojsonData.Properties)
 
 	return mip
 }

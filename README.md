@@ -33,6 +33,10 @@ mapstore.Add_LatLngPoly([[40, -70], [50, 20], [40, 40], [40, -70]])
 
 // GeoJSON strings (points, lines, and polygons)
 mapstore.Add_Geojson_Feature(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`)
+
+// add properties
+pt := mapstore.Add_Geojson_Feature(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }, "properties": { "color": "#0f0" }}`)
+pt.Properties()["color"]
 ```
 
 Each feature is added to the mapstore and returned as a MapItem
