@@ -10,10 +10,12 @@ your favorite language.
 MapPLZ consumes many many types of geodata. It can process data for a script or dump
 it into a database.
 
-Go does not support method overloading, so you need to name the right function for
-your data. Parameters are separated by an underscore, so sending (lat, lng) would be
-Add_Lat_Lng, sending (lng, lat) would be Add_Lng_Lat, and sending an array
-[lat, lng] is Add_LatLng.
+Go does not support method overloading, so you need to use Add, Add2, or Add3 depending
+on the number of parameters.
+
+You can also call specific Add functions. Function names are based on their parameters
+separated by an underscore, so send (lat, lng) to Add_Lat_Lng, send (lng, lat)
+to Add_Lng_Lat, and send an array [lat, lng] to Add_LatLng.
 
 Adding some data:
 
@@ -21,31 +23,29 @@ Adding some data:
 mapstore := mapplz.NewMapPLZ()
 
 // add points
-mapstore.Add_Lat_Lng(40, -70)
-mapstore.Add_Lng_Lat(-70, 40)
-
-var latlng_array = []float64{40, -70}
-mapstore.Add_LatLng(latlng_array)
+mapstore.Add2(40, -70)
+mapstore.Add2(-70, 40)
+mapstore.Add( []float64{ 40, -70 } )
 
 // add lines
-mapstore.Add_LatLngPath([[40, -70], [50, 20]])
+mapstore.Add_LatLngPath([][]float64{{40, -70}, {50, 20}})
 
 // add polygons
-mapstore.Add_LatLngPoly([[40, -70], [50, 20], [40, 40], [40, -70]])
+mapstore.Add_LatLngPoly([][]float64{{40, -70}, {50, 20}, {40, 40}, {40, -70}})
 
 // GeoJSON strings (points, lines, and polygons)
-mapstore.Add_Geojson_Feature(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`)
+mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`)
 
 // add properties
-pt := mapstore.Add_Geojson_Feature(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }, "properties": { "color": "#0f0" }}`)
+pt := mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }, "properties": { "color": "#0f0" }}`)
 pt.Properties()["color"]
 ```
 
 Each feature is added to the mapstore and returned as a MapItem
 
 ```
-pt := mapstore.Add_Lat_Lng(40, -70)
-line := mapstore.Add_LatLngPath_Json([[40, -70], [50, 20]], `{ "color": "red" }`)
+pt := mapstore.Add2(40, -70)
+line := mapstore.Add_LatLngPath_Json([][]float64{{40, -70}, {50, 20}}, `{ "color": "red" }`)
 
 len(mapstore.MapItems) == 2
 // export all with mapstore.ToGeoJson()

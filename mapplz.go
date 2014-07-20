@@ -24,6 +24,106 @@ type MapItem interface {
 	ToGeoJson() string
 }
 
+// global add
+
+func (mp *MapPLZ) Add(input interface{}) MapItem {
+	str, ok := input.(string)
+	if ok {
+  	return mp.Add_Geojson_Feature(str)
+	} else {
+		arr, ok := input.([]interface{})
+		if (ok && len(arr) > 2) {
+			lat := arr[0].(float64)
+			lng := arr[1].(float64)
+			props, ok := arr[2].(string)
+			if ok {
+				return mp.Add_Lat_Lng_Json(lat, lng, props)
+			} else {
+				props := arr[2].(map[string]interface{})
+				return mp.Add_Lat_Lng_Properties(lat, lng, props)
+			}
+		} else {
+		  latlng := input.([]float64)
+		  return mp.Add_LatLng(latlng)
+		}
+	}
+}
+
+func (mp *MapPLZ) Add2(input_first interface{}, input_second interface{}) MapItem {
+	// interface_int.(float64) fails
+	// ints must be read as int first, and then converted to float64
+	var lat float64
+	var lng float64
+	var lat_int int
+	var lng_int int
+
+	lat_set, ok := input_first.(float64)
+	if (!ok) {
+		lat_int, ok = input_first.(int)
+		lat = float64(lat_int)
+	} else {
+		lat = lat_set
+	}
+
+	lng_set, ok2 := input_second.(float64)
+	if (!ok2) {
+		lng_int, ok2 = input_second.(int)
+		lng = float64(lng_int)
+	} else {
+		lng = lng_set
+	}
+
+	if (ok && ok2) {
+		return mp.Add_Lat_Lng(lat, lng)
+	} else {
+		latlng, ok := input_first.([]float64)
+		props, ok := input_second.(string)
+		if ok {
+			return mp.Add_LatLng_Json(latlng, props)
+		} else {
+			props := input_second.(map[string]interface{})
+			return mp.Add_LatLng_Properties(latlng, props)
+		}
+	}
+}
+
+func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_third interface{}) MapItem {
+	// interface_int.(float64) fails
+	// ints must be read as int first, and then converted to float64
+	var lat float64
+	var lng float64
+	var lat_int int
+	var lng_int int
+
+	lat_set, ok := input_first.(float64)
+	if (!ok) {
+		lat_int, ok = input_first.(int)
+		lat = float64(lat_int)
+	} else {
+		lat = lat_set
+	}
+
+	lng_set, ok2 := input_second.(float64)
+	if (!ok2) {
+		lng_int, ok2 = input_second.(int)
+		lng = float64(lng_int)
+	} else {
+		lng = lng_set
+	}
+
+	if (ok && ok2) {
+		props, ok := input_third.(string)
+		if ok {
+			return mp.Add_Lat_Lng_Json(lat, lng, props)
+		} else {
+			props := input_third.(map[string]interface{})
+			return mp.Add_Lat_Lng_Properties(lat, lng, props)
+		}
+	} else {
+		return nil
+	}
+}
+
 // lat, lng with variations
 
 func (mp *MapPLZ) Add_Lat_Lng(lat float64, lng float64) MapItem {

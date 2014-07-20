@@ -15,6 +15,39 @@ func TestMapstore(t *testing.T) {
 	}
 }
 
+func TestGlobalAdd(t *testing.T) {
+	mapstore := NewMapPLZ()
+
+	// single param
+	mapstore.Add([]float64{40, -70})
+	mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }`)
+
+	if len(mapstore.MapItems) != 2 {
+		t.Errorf("global add failed")
+	}
+
+	// two param
+	mapstore.Add2(40.121, -70.2)
+	props := make(map[string]interface{})
+	props["color"] = "red"
+	mapstore.Add2([]float64{40.121, -70.2}, props)
+	mapstore.Add2([]float64{40, -70}, `{ "color": "red" }`)
+
+	if len(mapstore.MapItems) != 5 {
+		t.Errorf("global add2 failed")
+	}
+
+	// three param
+	props = make(map[string]interface{})
+	props["color"] = "red"
+	mapstore.Add3(40.121, -70.2, props)
+	mapstore.Add3(40, -70, `{ "color": "red" }`)
+
+	if len(mapstore.MapItems) != 7 {
+		t.Errorf("global add3 failed")
+	}
+}
+
 func TestLatLngProperties(t *testing.T) {
 	mapstore := NewMapPLZ()
 	props := make(map[string]interface{})
