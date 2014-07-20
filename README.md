@@ -24,7 +24,7 @@ mapstore := mapplz.NewMapPLZ()
 
 // add points
 mapstore.Add2(40, -70)
-mapstore.Add2(-70, 40)
+mapstore.Add_Lng_Lat(-70, 40)
 mapstore.Add( []float64{ 40, -70 } )
 
 // add lines
