@@ -5,6 +5,7 @@ import (
   "database/sql"
   "encoding/json"
   "log"
+  "bytes"
 )
 
 type PSQLDatabase struct {
