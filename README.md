@@ -62,6 +62,7 @@ line.Properties()["color"]
 
 * <a href="https://github.com/kellydunn/golang-geo">golang-geo</a> from Kelly Dunn (MIT license)
 * <a href="https://github.com/kpawlik/geojson">geojson</a> from Kris Pawlik (MIT license)
+* <a href="https://github.com/lib/pq">pq</a> (MIT license)
 
 ## License
 

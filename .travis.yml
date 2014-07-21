@@ -1,0 +1,19 @@
+language: go
+
+go:
+  - tip
+
+addons:
+  postgresql: "9.3"
+services:
+  - mongodb
+
+install:
+  - go get github.com/lib/pq
+  - go get github.com/kellydunn/golang-geo
+  - go get github.com/kpawlik/geojson
+
+before_script:
+  - psql -c 'create database travis_postgis;' -U postgres
+  - psql -c 'CREATE EXTENSION postgis;' -U postgres -d travis_postgis
+  - psql -c 'CREATE EXTENSION postgis_topology;' -U postgres -d travis_postgis
