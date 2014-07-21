@@ -6,11 +6,19 @@ import (
 
 type MapPLZ struct {
 	MapItems []MapItem
+	Database MapDatabase
 }
 
 func NewMapPLZ() MapPLZ {
 	var mis = []MapItem{}
 	return MapPLZ{MapItems: mis}
+}
+
+type MapDatabase interface {
+	Type() string
+	SetDB(interface{})
+	Add(MapItem)
+	Query() []MapItem
 }
 
 type MapItem interface {
@@ -22,6 +30,7 @@ type MapItem interface {
 	Properties() map[string]interface{}
 	SetJsonProperties(string)
 	ToGeoJson() string
+	ToWKT() string
 }
 
 // global add
@@ -129,6 +138,9 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 func (mp *MapPLZ) Add_Lat_Lng(lat float64, lng float64) MapItem {
 	mip := NewMapItemPoint(lat, lng)
 	mp.MapItems = append(mp.MapItems, mip)
+	if mp.Database != nil {
+		mp.Database.Add(mip)
+	}
 	return mip
 }
 
@@ -293,4 +305,14 @@ func (mp *MapPLZ) Add_LngLatPoly_Json(path [][]float64, props string) MapItem {
 	var prop_map = map[string]interface{}{}
 	json.Unmarshal([]byte(props), &prop_map)
 	return mp.Add_LngLatPoly_Properties(path, prop_map)
+}
+
+// database queries
+
+func (mp *MapPLZ) Query() []MapItem {
+	if mp.Database != nil {
+  	return mp.Database.Query()
+	} else {
+		return mp.MapItems
+	}
 }

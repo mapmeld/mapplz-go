@@ -81,3 +81,7 @@ func (mip *MapItemPoly) ToGeoJson() string {
 	}
 	return gjstr
 }
+
+func (mip *MapItemPoly) ToWKT() string {
+	return "POLYGON((0 0, 1 1))"
+}

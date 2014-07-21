@@ -81,3 +81,7 @@ func (mip *MapItemLine) ToGeoJson() string {
 	}
 	return gjstr
 }
+
+func (mip *MapItemLine) ToWKT() string {
+	return "LINESTRING(0 0, 1 1)"
+}
