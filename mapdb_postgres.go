@@ -4,6 +4,7 @@ import (
   _ "github.com/lib/pq"
   "database/sql"
   "encoding/json"
+  "log"
 )
 
 type PSQLDatabase struct {
@@ -28,15 +29,22 @@ func (psql *PSQLDatabase) Add(mip MapItem) {
   props_str := string(props_json)
   wkt := mip.ToWKT()
 
+  var buf bytes.Buffer
+	logger := log.New(&buf, "logger: ", log.Lshortfile)
+	logger.Print("props_str: %s", props_str)
+  logger.Print("wkt: %s", wkt)
+
   psql.db.QueryRow("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id'").Scan(&shape_id)
 }
 
 func (psql *PSQLDatabase) Query() []MapItem {
   var mitems []MapItem
   rows, err := psql.db.Query("SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz")
-  if err != nil {
-    panic(err)
-  }
+
+  var buf bytes.Buffer
+  logger := log.New(&buf, "logger: ", log.Lshortfile)
+  logger.Print("err: %s", err)
+
   for rows.Next() {
     var geo string
     rows.Scan(&geo)
