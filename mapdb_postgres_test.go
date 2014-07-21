@@ -8,7 +8,7 @@ import (
 
 func TestSetDb(t *testing.T) {
 	mapstore := NewMapPLZ()
-	db, err := sql.Open("postgres", "user=ndoiron404 dbname=travis_postgis sslmode=disable")
+	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
 	if err != nil {
 		t.Errorf("did not connect to PostGIS")
 	}
@@ -18,7 +18,7 @@ func TestSetDb(t *testing.T) {
 
 func TestSaveToDb(t *testing.T) {
 	mapstore := NewMapPLZ()
-	db, err := sql.Open("postgres", "user=ndoiron404 dbname=travis_postgis sslmode=disable")
+	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
 	if err != nil {
 		t.Errorf("did not connect to PostGIS")
 	}
