@@ -33,7 +33,10 @@ func (psql *PSQLDatabase) Add(mip MapItem) {
 
 func (psql *PSQLDatabase) Query() []MapItem {
   var mitems []MapItem
-  rows, _ := psql.db.Query("SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz")
+  rows, err := psql.db.Query("SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz")
+  if err != nil {
+    panic(err)
+  }
   for rows.Next() {
     var geo string
     rows.Scan(&geo)
