@@ -38,10 +38,10 @@ type MapItem interface {
 func (mp *MapPLZ) Add(input interface{}) MapItem {
 	str, ok := input.(string)
 	if ok {
-  	return mp.Add_Geojson_Feature(str)
+		return mp.Add_Geojson_Feature(str)
 	} else {
 		arr, ok := input.([]interface{})
-		if (ok && len(arr) > 2) {
+		if ok && len(arr) > 2 {
 			lat := arr[0].(float64)
 			lng := arr[1].(float64)
 			props, ok := arr[2].(string)
@@ -52,8 +52,8 @@ func (mp *MapPLZ) Add(input interface{}) MapItem {
 				return mp.Add_Lat_Lng_Properties(lat, lng, props)
 			}
 		} else {
-		  latlng := input.([]float64)
-		  return mp.Add_LatLng(latlng)
+			latlng := input.([]float64)
+			return mp.Add_LatLng(latlng)
 		}
 	}
 }
@@ -67,7 +67,7 @@ func (mp *MapPLZ) Add2(input_first interface{}, input_second interface{}) MapIte
 	var lng_int int
 
 	lat_set, ok := input_first.(float64)
-	if (!ok) {
+	if !ok {
 		lat_int, ok = input_first.(int)
 		lat = float64(lat_int)
 	} else {
@@ -75,14 +75,14 @@ func (mp *MapPLZ) Add2(input_first interface{}, input_second interface{}) MapIte
 	}
 
 	lng_set, ok2 := input_second.(float64)
-	if (!ok2) {
+	if !ok2 {
 		lng_int, ok2 = input_second.(int)
 		lng = float64(lng_int)
 	} else {
 		lng = lng_set
 	}
 
-	if (ok && ok2) {
+	if ok && ok2 {
 		return mp.Add_Lat_Lng(lat, lng)
 	} else {
 		latlng, ok := input_first.([]float64)
@@ -105,7 +105,7 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 	var lng_int int
 
 	lat_set, ok := input_first.(float64)
-	if (!ok) {
+	if !ok {
 		lat_int, ok = input_first.(int)
 		lat = float64(lat_int)
 	} else {
@@ -113,14 +113,14 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 	}
 
 	lng_set, ok2 := input_second.(float64)
-	if (!ok2) {
+	if !ok2 {
 		lng_int, ok2 = input_second.(int)
 		lng = float64(lng_int)
 	} else {
 		lng = lng_set
 	}
 
-	if (ok && ok2) {
+	if ok && ok2 {
 		props, ok := input_third.(string)
 		if ok {
 			return mp.Add_Lat_Lng_Json(lat, lng, props)
@@ -311,7 +311,7 @@ func (mp *MapPLZ) Add_LngLatPoly_Json(path [][]float64, props string) MapItem {
 
 func (mp *MapPLZ) Query() []MapItem {
 	if mp.Database != nil {
-  	return mp.Database.Query()
+		return mp.Database.Query()
 	} else {
 		return mp.MapItems
 	}

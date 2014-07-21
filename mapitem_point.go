@@ -1,8 +1,8 @@
 package mapplz
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/kellydunn/golang-geo"
 	gj "github.com/kpawlik/geojson"
 )
@@ -63,5 +63,5 @@ func (mip *MapItemPoint) ToGeoJson() string {
 }
 
 func (mip *MapItemPoint) ToWKT() string {
-	return fmt.Sprintf("POINT(%d %d)", mip.Lng(), mip.Lat())
+	return fmt.Sprintf("POINT(%v %v)", mip.Lng(), mip.Lat())
 }

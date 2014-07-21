@@ -2,6 +2,7 @@ package mapplz
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -61,6 +62,7 @@ func (mp *MapPLZ) Add_Geojson_Feature(geojson string) MapItem {
 		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Polygon.Coordinates)
 		mip = mp.Add_LngLatPoly(geojsonData.Geometry.Polygon.Coordinates[0])
 	default:
+		fmt.Printf("%s", geojson)
 		panic("Unsupported type")
 	}
 
