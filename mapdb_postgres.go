@@ -50,3 +50,9 @@ func (psql *PSQLDatabase) Query() []MapItem {
 	}
 	return mitems
 }
+
+func (psql *PSQLDatabase) Count() int {
+  var count int
+  rows, _ := psql.db.QueryRow("SELECT COUNT(*) FROM mapplz").Scan(&count)
+  return count
+}

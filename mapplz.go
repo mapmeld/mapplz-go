@@ -309,6 +309,14 @@ func (mp *MapPLZ) Add_LngLatPoly_Json(path [][]float64, props string) MapItem {
 
 // database queries
 
+func (mp *MapPLZ) Count() int {
+	if mp.Database != nil {
+		return mp.Database.Count()
+	} else {
+		return len(mp.MapItems)
+	}
+}
+
 func (mp *MapPLZ) Query() []MapItem {
 	if mp.Database != nil {
 		return mp.Database.Query()
