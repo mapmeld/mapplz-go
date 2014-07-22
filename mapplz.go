@@ -19,6 +19,7 @@ type MapDatabase interface {
 	SetDB(interface{})
 	Add(MapItem)
 	Query() []MapItem
+	Count() int
 }
 
 type MapItem interface {
