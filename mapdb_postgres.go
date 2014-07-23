@@ -3,6 +3,7 @@ package mapplz
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	_ "github.com/lib/pq"
 )
 
@@ -24,9 +25,17 @@ func (psql *PSQLDatabase) QueryRow(sql string) int {
 	return id
 }
 
-func (psql *PSQLDatabase) Query() []MapItem {
+func (psql *PSQLDatabase) Query(sql string) []MapItem {
+	if sql == "" {
+		sql = "SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz"
+	} else {
+		sql_prop := strings.Split(strings.TrimSpace(sql), " ")[0]
+		sql = strings.Replace(sql, sql_prop, "json_extract_path_text(properties, '" + sql_prop + "')", -1)
+		sql = "SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz WHERE " + sql
+	}
+
 	var mitems []MapItem
-	rows, _ := psql.db.Query("SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz")
+	rows, _ := psql.db.Query(sql)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -46,8 +55,15 @@ func (psql *PSQLDatabase) Query() []MapItem {
 	return mitems
 }
 
-func (psql *PSQLDatabase) Count() int {
+func (psql *PSQLDatabase) Count(sql string) int {
+	if sql == "" {
+		sql = "SELECT COUNT(*) FROM mapplz"
+	} else {
+		sql_prop := strings.Split(strings.TrimSpace(sql), " ")[0]
+		sql = strings.Replace(sql, sql_prop, "json_extract_path_text(properties, '" + sql_prop + "')", -1)
+		sql = "SELECT COUNT(*) FROM mapplz WHERE " + sql
+	}
 	var count int
-	psql.db.QueryRow("SELECT COUNT(*) FROM mapplz").Scan(&count)
+	psql.db.QueryRow(sql).Scan(&count)
 	return count
 }

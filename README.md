@@ -39,6 +39,8 @@ mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates":
 // add properties
 pt := mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }, "properties": { "color": "#0f0" }}`)
 pt.Properties()["color"]
+pt.SetJsonProperties(`{ "fill": "#00f" }`)
+pt.SetProperties(map[string]interface{})
 ```
 
 Each feature is added to the mapstore and returned as a MapItem
@@ -54,8 +56,12 @@ line.Type() == "line"
 line.Path() == [[[40, -70], [50, 20]]]
 line.Properties()["color"]
 
-mapstore.Count() == 2  // MapItems count
-mapstore.ToGeoJson() // export all
+mapstore.Count("") == 2  // MapItems count ("" selects all)
+mapstore.Query("") // array of all MapItems ("" selects all)
+mapstore.ToGeoJson() // export all as GeoJSON
+
+// currently unsupported without PostGIS
+mapstore.Where("color = 'red'") // enter a SQL WHERE clause
 ```
 
 ## Databases
@@ -68,6 +74,13 @@ Here's how you can connect:
 mapstore := NewMapPLZ()
 db, _ := sql.Open("postgres", "user=USER dbname=DB sslmode=SSLMODE")
 mapstore.Database = NewPostGISDB(db)
+
+// adding, updating, querying, and exporting data works the same way
+pt := mapstore.Add_Lat_Lng(40, -70)
+pt.SetJsonProperties(`{ "color": "red" }`)
+mapstore.Count("")
+mapstore.Where("color = 'red'")
+mapstore.ToGeoJson()
 ```
 
 ## Packages

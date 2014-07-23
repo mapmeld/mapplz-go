@@ -22,7 +22,7 @@ func TestGlobalAdd(t *testing.T) {
 	mapstore.Add([]float64{40, -70})
 	mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }`)
 
-	if len(mapstore.MapItems) != 2 || mapstore.Count() != 2 {
+	if len(mapstore.MapItems) != 2 || mapstore.Count("") != 2 {
 		t.Errorf("global add failed")
 	}
 
@@ -33,7 +33,7 @@ func TestGlobalAdd(t *testing.T) {
 	mapstore.Add2([]float64{40.121, -70.2}, props)
 	mapstore.Add2([]float64{40, -70}, `{ "color": "red" }`)
 
-	if len(mapstore.MapItems) != 5 || mapstore.Count() != 5 {
+	if len(mapstore.MapItems) != 5 || mapstore.Count("") != 5 {
 		t.Errorf("global add2 failed")
 	}
 
@@ -43,7 +43,7 @@ func TestGlobalAdd(t *testing.T) {
 	mapstore.Add3(40.121, -70.2, props)
 	mapstore.Add3(40, -70, `{ "color": "red" }`)
 
-	if len(mapstore.MapItems) != 7 || mapstore.Count() != 7 {
+	if len(mapstore.MapItems) != 7 || mapstore.Count("") != 7 {
 		t.Errorf("global add3 failed")
 	}
 }

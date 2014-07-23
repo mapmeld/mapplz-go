@@ -37,6 +37,10 @@ type GeojsonFeatureCollection struct {
 }
 
 func (mp *MapPLZ) ToGeoJson() string {
+	if mp.Database != nil {
+		// fetch all items from the DB
+		mp.MapItems = mp.Query("")
+	}
 	var features = []string{}
 	for i := 0; i < len(mp.MapItems); i++ {
 		features = append(features, mp.MapItems[i].ToGeoJson())
