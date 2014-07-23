@@ -6,16 +6,6 @@ import (
 	"testing"
 )
 
-func TestSetDb(t *testing.T) {
-	mapstore := NewMapPLZ()
-	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
-	if err != nil {
-		t.Errorf("did not connect to PostGIS")
-	}
-	mapstore.Database = NewPostGISDB()
-	mapstore.Database.SetDB(db)
-}
-
 func TestSaveToDb(t *testing.T) {
 	mapstore := NewMapPLZ()
 	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
@@ -24,8 +14,7 @@ func TestSaveToDb(t *testing.T) {
 	}
 	db.Exec("CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)")
 
-	mapstore.Database = NewPostGISDB()
-	mapstore.Database.SetDB(db)
+	mapstore.Database = NewPostGISDB(db)
 
 	mapstore.Add2(40.1, -70.2)
 	pt := mapstore.Query()[0]
@@ -44,8 +33,7 @@ func TestCount(t *testing.T) {
 	}
 	db.Exec("CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)")
 
-	mapstore.Database = NewPostGISDB()
-	mapstore.Database.SetDB(db)
+	mapstore.Database = NewPostGISDB(db)
 
 	mapstore.Add2(40.1, -70.2)
 	if mapstore.Count() != 1 {
@@ -63,17 +51,18 @@ func TestUpdate(t *testing.T) {
 	}
 	db.Exec("CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)")
 
-	mapstore.Database = NewPostGISDB()
-	mapstore.Database.SetDB(db)
+	mapstore.Database = NewPostGISDB(db)
 
-	mapstore.Add2(40.1, -70.2)
-	pt := mapstore.Query()[0]
+	pt := mapstore.Add2(40.1, -70.2)
+
+	pt = mapstore.Query()[0]
 	if pt.Lat() != 40.1 || pt.Lng() != -70.2 {
 		t.Errorf("did not return point from PostGIS")
 	}
 
 	props := make(map[string]interface{})
 	props["color"] = "red"
+
 	pt.SetProperties(props)
 
 	pt = mapstore.Query()[0]

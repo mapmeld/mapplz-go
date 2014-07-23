@@ -16,7 +16,6 @@ func NewMapPLZ() MapPLZ {
 
 type MapDatabase interface {
 	Type() string
-	SetDB(interface{})
 	Query() []MapItem
 	Count() int
 	QueryRow(string) int

@@ -10,8 +10,8 @@ type PSQLDatabase struct {
 	db *sql.DB
 }
 
-func NewPostGISDB() *PSQLDatabase {
-	return &PSQLDatabase{}
+func NewPostGISDB(db *sql.DB) *PSQLDatabase {
+	return &PSQLDatabase{db: db}
 }
 
 func (psql *PSQLDatabase) Type() string {
@@ -22,10 +22,6 @@ func (psql *PSQLDatabase) QueryRow(sql string) int {
 	var id int
 	psql.db.QueryRow(sql).Scan(&id)
 	return id
-}
-
-func (psql *PSQLDatabase) SetDB(dbinfo interface{}) {
-	psql.db = dbinfo.(*sql.DB)
 }
 
 func (psql *PSQLDatabase) Query() []MapItem {
@@ -41,11 +37,10 @@ func (psql *PSQLDatabase) Query() []MapItem {
 			fmt.Printf("row scan error: %s", err)
 		}
 		mip := ConvertGeojsonFeature(`{ "type": "Feature", "geometry": `+geo+`}`, nil)
+		mip.SetID(fmt.Sprintf("%v", id))
 		mip.SetJsonProperties(props)
-
-		// set id and db later so it's not re-inserted into DB
-		mip.SetID(string(id))
 		mip.SetDB(psql)
+
 		mitems = append(mitems, mip)
 	}
 	return mitems

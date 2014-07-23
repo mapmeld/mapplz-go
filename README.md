@@ -67,8 +67,7 @@ Here's how you can connect:
 ```
 mapstore := NewMapPLZ()
 db, _ := sql.Open("postgres", "user=USER dbname=DB sslmode=SSLMODE")
-mapstore.Database = NewPostGISDB()
-mapstore.Database.SetDB(db)
+mapstore.Database = NewPostGISDB(db)
 ```
 
 ## Packages
