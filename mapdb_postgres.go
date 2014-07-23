@@ -44,8 +44,7 @@ func (psql *PSQLDatabase) Query() []MapItem {
 		if err := rows.Scan(&id, &geo, &props); err != nil {
 			fmt.Printf("row scan error: %s", err)
 		}
-		faker := NewMapPLZ()
-		mip := faker.Add(`{ "type": "Feature", "geometry": ` + geo + `}`)
+		mip := ConvertGeojsonFeature(`{ "type": "Feature", "geometry": ` + geo + `}`)
 		mitems = append(mitems, mip)
 	}
 	return mitems

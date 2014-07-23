@@ -2,7 +2,6 @@ package mapplz
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -46,31 +45,8 @@ func (mp *MapPLZ) ToGeoJson() string {
 }
 
 func (mp *MapPLZ) Add_Geojson_Feature(geojson string) MapItem {
-	// GeoJSON parsing based on http://stackoverflow.com/a/15728702
-	var geojsonData GeojsonFeature
-	err := json.Unmarshal([]byte(geojson), &geojsonData)
-	var mip MapItem
-
-	switch geojsonData.Geometry.Type {
-	case "Point":
-		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Point.Coordinates)
-		mip = mp.Add_LngLat(geojsonData.Geometry.Point.Coordinates)
-	case "LineString":
-		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Line.Coordinates)
-		mip = mp.Add_LngLatPath(geojsonData.Geometry.Line.Coordinates)
-	case "Polygon":
-		err = json.Unmarshal(geojsonData.Geometry.Coordinates, &geojsonData.Geometry.Polygon.Coordinates)
-		mip = mp.Add_LngLatPoly(geojsonData.Geometry.Polygon.Coordinates[0])
-	default:
-		fmt.Printf("%s", geojson)
-		panic("Unsupported type")
-	}
-
-	if err != nil {
-		panic("Failed to parse JSON string")
-	}
-
-	mip.SetProperties(geojsonData.Properties)
+	mip := ConvertGeojsonFeature(geojson)
+	mp.MapItems = append(mp.MapItems, mip)
 
 	return mip
 }

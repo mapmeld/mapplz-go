@@ -10,16 +10,13 @@
 
 ## Databases
 
-* Separate out geo ETL into a static method, so it can be called from a MapDatabase
-* Refactor geo ETL so it can be called without adding to MapItems
 * Save IDs
-* Add Save() to MapItem
+* Working Save() to MapItem
 
 ## Formats
 
 * Return []MapItem from GeoJSON FeatureCollection, remove old types
-* Make a real ToWKT() on Line and Poly MapItems
-* Always return an array of MapItems (or maybe [0] if there's only one)
+* Always return an array of MapItems (or maybe singleton if there's only one)
 
 ## No DB
 
@@ -29,8 +26,7 @@
 ## PostGIS
 
 * Load geo results without putting them into a MapPLZ instance
-* Test saving and loading properties
-* Count
+* Count by property
 * Query by property
 * Spatial queries
 

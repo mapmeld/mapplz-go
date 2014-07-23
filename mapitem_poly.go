@@ -2,11 +2,14 @@ package mapplz
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kellydunn/golang-geo"
 	gj "github.com/kpawlik/geojson"
 )
 
 type MapItemPoly struct {
+	id         int
+	db         *MapDatabase
 	path       *geo.Polygon
 	properties map[string]interface{}
 }
@@ -50,6 +53,7 @@ func (mip *MapItemPoly) SetProperties(props map[string]interface{}) {
 	for key, value := range props {
 		mip.properties[key] = value
 	}
+	mip.Save()
 }
 
 func (mip *MapItemPoly) SetJsonProperties(props string) {
@@ -83,5 +87,19 @@ func (mip *MapItemPoly) ToGeoJson() string {
 }
 
 func (mip *MapItemPoly) ToWKT() string {
-	return "POLYGON((0 0, 1 1))"
+	path_pts := mip.path.Points()
+	ptlist := ""
+	for i := 0; i < len(path_pts); i++ {
+		if i > 0 {
+			ptlist += ","
+		}
+		ptlist += fmt.Sprintf("%v %v", path_pts[i].Lng(), path_pts[i].Lat())
+	}
+	return "POLYGON((" + ptlist + "))"
+}
+
+func (mip *MapItemPoly) Save() {
+	if mip.db != nil {
+
+	}
 }

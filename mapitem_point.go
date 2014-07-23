@@ -8,6 +8,8 @@ import (
 )
 
 type MapItemPoint struct {
+	id         int
+	db         *MapDatabase
 	point      *geo.Point
 	properties map[string]interface{}
 }
@@ -38,6 +40,7 @@ func (mip *MapItemPoint) SetProperties(props map[string]interface{}) {
 	for key, value := range props {
 		mip.properties[key] = value
 	}
+	mip.Save()
 }
 
 func (mip *MapItemPoint) SetJsonProperties(props string) {
@@ -64,4 +67,9 @@ func (mip *MapItemPoint) ToGeoJson() string {
 
 func (mip *MapItemPoint) ToWKT() string {
 	return fmt.Sprintf("POINT(%v %v)", mip.Lng(), mip.Lat())
+}
+
+func (mip *MapItemPoint) Save() {
+	if mip.db != nil {
+	}
 }
