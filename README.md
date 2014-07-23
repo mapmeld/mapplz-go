@@ -47,15 +47,27 @@ Each feature is added to the mapstore and returned as a MapItem
 pt := mapstore.Add2(40, -70)
 line := mapstore.Add_LatLngPath_Json([][]float64{{40, -70}, {50, 20}}, `{ "color": "red" }`)
 
-len(mapstore.MapItems) == 2
-// export all with mapstore.ToGeoJson()
-
 pt.Lat() == 40
 pt.ToGeoJson() == `{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] }}`
 
 line.Type() == "line"
 line.Path() == [[[40, -70], [50, 20]]]
 line.Properties()["color"]
+
+mapstore.Count() == 2  // MapItems count
+mapstore.ToGeoJson() // export all
+```
+
+## Databases
+
+MapPLZ can integrate with PostGIS and take the complexities out of your hands.
+
+Here's how you can connect:
+
+```
+mapstore := NewMapPLZ()
+db, _ := sql.Open("postgres", "user=USER dbname=DB sslmode=SSLMODE")
+mapstore.Database = NewPostGISDB(db)
 ```
 
 ## Packages
@@ -63,6 +75,7 @@ line.Properties()["color"]
 * <a href="https://github.com/kellydunn/golang-geo">golang-geo</a> from Kelly Dunn (MIT license)
 * <a href="https://github.com/kpawlik/geojson">geojson</a> from Kris Pawlik (MIT license)
 * <a href="https://github.com/lib/pq">pq</a> (MIT license)
+* <a href="http://labix.org/mgo">mgo</a> (Simplified BSD license) (requires bzr tool)
 
 ## License
 

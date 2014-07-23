@@ -6,6 +6,7 @@ import (
 
 type MapPLZ struct {
 	MapItems []MapItem
+	Database MapDatabase
 }
 
 func NewMapPLZ() MapPLZ {
@@ -13,7 +14,16 @@ func NewMapPLZ() MapPLZ {
 	return MapPLZ{MapItems: mis}
 }
 
+type MapDatabase interface {
+	Type() string
+	Query() []MapItem
+	Count() int
+	QueryRow(string) int
+}
+
 type MapItem interface {
+	SetID(string)
+	SetDB(MapDatabase)
 	Type() string
 	Lat() float64
 	Lng() float64
@@ -22,6 +32,8 @@ type MapItem interface {
 	Properties() map[string]interface{}
 	SetJsonProperties(string)
 	ToGeoJson() string
+	ToWKT() string
+	Save()
 }
 
 // global add
@@ -29,10 +41,10 @@ type MapItem interface {
 func (mp *MapPLZ) Add(input interface{}) MapItem {
 	str, ok := input.(string)
 	if ok {
-  	return mp.Add_Geojson_Feature(str)
+		return mp.Add_Geojson_Feature(str)
 	} else {
 		arr, ok := input.([]interface{})
-		if (ok && len(arr) > 2) {
+		if ok && len(arr) > 2 {
 			lat := arr[0].(float64)
 			lng := arr[1].(float64)
 			props, ok := arr[2].(string)
@@ -43,8 +55,8 @@ func (mp *MapPLZ) Add(input interface{}) MapItem {
 				return mp.Add_Lat_Lng_Properties(lat, lng, props)
 			}
 		} else {
-		  latlng := input.([]float64)
-		  return mp.Add_LatLng(latlng)
+			latlng := input.([]float64)
+			return mp.Add_LatLng(latlng)
 		}
 	}
 }
@@ -58,7 +70,7 @@ func (mp *MapPLZ) Add2(input_first interface{}, input_second interface{}) MapIte
 	var lng_int int
 
 	lat_set, ok := input_first.(float64)
-	if (!ok) {
+	if !ok {
 		lat_int, ok = input_first.(int)
 		lat = float64(lat_int)
 	} else {
@@ -66,14 +78,14 @@ func (mp *MapPLZ) Add2(input_first interface{}, input_second interface{}) MapIte
 	}
 
 	lng_set, ok2 := input_second.(float64)
-	if (!ok2) {
+	if !ok2 {
 		lng_int, ok2 = input_second.(int)
 		lng = float64(lng_int)
 	} else {
 		lng = lng_set
 	}
 
-	if (ok && ok2) {
+	if ok && ok2 {
 		return mp.Add_Lat_Lng(lat, lng)
 	} else {
 		latlng, ok := input_first.([]float64)
@@ -96,7 +108,7 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 	var lng_int int
 
 	lat_set, ok := input_first.(float64)
-	if (!ok) {
+	if !ok {
 		lat_int, ok = input_first.(int)
 		lat = float64(lat_int)
 	} else {
@@ -104,14 +116,14 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 	}
 
 	lng_set, ok2 := input_second.(float64)
-	if (!ok2) {
+	if !ok2 {
 		lng_int, ok2 = input_second.(int)
 		lng = float64(lng_int)
 	} else {
 		lng = lng_set
 	}
 
-	if (ok && ok2) {
+	if ok && ok2 {
 		props, ok := input_third.(string)
 		if ok {
 			return mp.Add_Lat_Lng_Json(lat, lng, props)
@@ -127,13 +139,14 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 // lat, lng with variations
 
 func (mp *MapPLZ) Add_Lat_Lng(lat float64, lng float64) MapItem {
-	mip := NewMapItemPoint(lat, lng)
+	mip := Convert_Lat_Lng(lat, lng, mp.Database)
+	mip.Save()
 	mp.MapItems = append(mp.MapItems, mip)
 	return mip
 }
 
 func (mp *MapPLZ) Add_Lat_Lng_Properties(lat float64, lng float64, props map[string]interface{}) MapItem {
-	mip := NewMapItemPoint(lat, lng)
+	mip := Convert_Lat_Lng(lat, lng, mp.Database)
 	mip.SetProperties(props)
 	mp.MapItems = append(mp.MapItems, mip)
 	return mip
@@ -208,13 +221,14 @@ func (mp *MapPLZ) Add_LngLatJson(lnglatprops []interface{}) MapItem {
 // latlng path
 
 func (mp *MapPLZ) Add_LatLngPath(path [][]float64) MapItem {
-	ml := NewMapItemLine(path)
+	ml := ConvertPath(path, mp.Database)
+	ml.Save()
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
 }
 
 func (mp *MapPLZ) Add_LatLngPath_Properties(path [][]float64, props map[string]interface{}) MapItem {
-	ml := NewMapItemLine(path)
+	ml := ConvertPath(path, mp.Database)
 	ml.SetProperties(props)
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
@@ -253,13 +267,14 @@ func (mp *MapPLZ) Add_LngLatPath_Json(path [][]float64, props string) MapItem {
 // latlng poly
 
 func (mp *MapPLZ) Add_LatLngPoly(path [][]float64) MapItem {
-	ml := NewMapItemPoly(path)
+	ml := ConvertPoly(path, mp.Database)
+	ml.Save()
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
 }
 
 func (mp *MapPLZ) Add_LatLngPoly_Properties(path [][]float64, props map[string]interface{}) MapItem {
-	ml := NewMapItemPoly(path)
+	ml := ConvertPoly(path, mp.Database)
 	ml.SetProperties(props)
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
@@ -293,4 +308,22 @@ func (mp *MapPLZ) Add_LngLatPoly_Json(path [][]float64, props string) MapItem {
 	var prop_map = map[string]interface{}{}
 	json.Unmarshal([]byte(props), &prop_map)
 	return mp.Add_LngLatPoly_Properties(path, prop_map)
+}
+
+// database queries
+
+func (mp *MapPLZ) Count() int {
+	if mp.Database != nil {
+		return mp.Database.Count()
+	} else {
+		return len(mp.MapItems)
+	}
+}
+
+func (mp *MapPLZ) Query() []MapItem {
+	if mp.Database != nil {
+		return mp.Database.Query()
+	} else {
+		return mp.MapItems
+	}
 }

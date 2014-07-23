@@ -2,18 +2,21 @@ package mapplz
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kellydunn/golang-geo"
 	gj "github.com/kpawlik/geojson"
 )
 
 type MapItemPoint struct {
+	id         string
+	db         MapDatabase
 	point      *geo.Point
 	properties map[string]interface{}
 }
 
-func NewMapItemPoint(lat float64, lng float64) *MapItemPoint {
+func NewMapItemPoint(lat float64, lng float64, db MapDatabase) *MapItemPoint {
 	pt := geo.NewPoint(lat, lng)
-	return &MapItemPoint{point: pt, properties: make(map[string]interface{})}
+	return &MapItemPoint{point: pt, properties: make(map[string]interface{}), db: db}
 }
 
 func (mip *MapItemPoint) Type() string {
@@ -33,10 +36,19 @@ func (mip *MapItemPoint) Path() [][][]float64 {
 	return blank
 }
 
+func (mip *MapItemPoint) SetID(id string) {
+	mip.id = id
+}
+
+func (mip *MapItemPoint) SetDB(db MapDatabase) {
+	mip.db = db
+}
+
 func (mip *MapItemPoint) SetProperties(props map[string]interface{}) {
 	for key, value := range props {
 		mip.properties[key] = value
 	}
+	mip.Save()
 }
 
 func (mip *MapItemPoint) SetJsonProperties(props string) {
@@ -59,4 +71,25 @@ func (mip *MapItemPoint) ToGeoJson() string {
 		panic("failed to export point to GeoJSON")
 	}
 	return gjstr
+}
+
+func (mip *MapItemPoint) ToWKT() string {
+	return fmt.Sprintf("POINT(%v %v)", mip.Lng(), mip.Lat())
+}
+
+func (mip *MapItemPoint) Save() {
+	if mip.db != nil {
+		props_json, _ := json.Marshal(mip.Properties())
+		props_str := string(props_json)
+		wkt := mip.ToWKT()
+
+		if mip.id == "" {
+			// new MapItem
+			id := mip.db.QueryRow("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id")
+			mip.id = fmt.Sprintf("%v", id)
+		} else {
+			// update MapItem
+			mip.db.QueryRow("UPDATE mapplz SET geom = ST_GeomFromText('" + wkt + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
+		}
+	}
 }
