@@ -17,12 +17,14 @@ func NewMapPLZ() MapPLZ {
 type MapDatabase interface {
 	Type() string
 	SetDB(interface{})
-	Add(MapItem)
 	Query() []MapItem
 	Count() int
+	QueryRow(string) int
 }
 
 type MapItem interface {
+	SetID(string)
+	SetDB(MapDatabase)
 	Type() string
 	Lat() float64
 	Lng() float64
@@ -138,16 +140,14 @@ func (mp *MapPLZ) Add3(input_first interface{}, input_second interface{}, input_
 // lat, lng with variations
 
 func (mp *MapPLZ) Add_Lat_Lng(lat float64, lng float64) MapItem {
-	mip := Convert_Lat_Lng(lat, lng)
+	mip := Convert_Lat_Lng(lat, lng, mp.Database)
+	mip.Save()
 	mp.MapItems = append(mp.MapItems, mip)
-	if mp.Database != nil {
-		mp.Database.Add(mip)
-	}
 	return mip
 }
 
 func (mp *MapPLZ) Add_Lat_Lng_Properties(lat float64, lng float64, props map[string]interface{}) MapItem {
-	mip := Convert_Lat_Lng(lat, lng)
+	mip := Convert_Lat_Lng(lat, lng, mp.Database)
 	mip.SetProperties(props)
 	mp.MapItems = append(mp.MapItems, mip)
 	return mip
@@ -222,13 +222,14 @@ func (mp *MapPLZ) Add_LngLatJson(lnglatprops []interface{}) MapItem {
 // latlng path
 
 func (mp *MapPLZ) Add_LatLngPath(path [][]float64) MapItem {
-	ml := ConvertPath(path)
+	ml := ConvertPath(path, mp.Database)
+	ml.Save()
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
 }
 
 func (mp *MapPLZ) Add_LatLngPath_Properties(path [][]float64, props map[string]interface{}) MapItem {
-	ml := ConvertPath(path)
+	ml := ConvertPath(path, mp.Database)
 	ml.SetProperties(props)
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
@@ -267,13 +268,14 @@ func (mp *MapPLZ) Add_LngLatPath_Json(path [][]float64, props string) MapItem {
 // latlng poly
 
 func (mp *MapPLZ) Add_LatLngPoly(path [][]float64) MapItem {
-	ml := ConvertPoly(path)
+	ml := ConvertPoly(path, mp.Database)
+	ml.Save()
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml
 }
 
 func (mp *MapPLZ) Add_LatLngPoly_Properties(path [][]float64, props map[string]interface{}) MapItem {
-	ml := ConvertPoly(path)
+	ml := ConvertPoly(path, mp.Database)
 	ml.SetProperties(props)
 	mp.MapItems = append(mp.MapItems, ml)
 	return ml

@@ -8,19 +8,19 @@ import (
 )
 
 type MapItemLine struct {
-	id         int
-	db         *MapDatabase
+	id         string
+	db         MapDatabase
 	path       *geo.Polygon
 	properties map[string]interface{}
 }
 
-func NewMapItemLine(latlngs [][]float64) *MapItemLine {
+func NewMapItemLine(latlngs [][]float64, db MapDatabase) *MapItemLine {
 	var linepts = []*geo.Point{}
 	for i := 0; i < len(latlngs); i++ {
 		linepts = append(linepts, geo.NewPoint(latlngs[i][0], latlngs[i][1]))
 	}
 	line := geo.NewPolygon(linepts)
-	return &MapItemLine{path: line, properties: make(map[string]interface{})}
+	return &MapItemLine{path: line, properties: make(map[string]interface{}), db: db}
 }
 
 func (mip *MapItemLine) Type() string {
@@ -47,6 +47,14 @@ func (mip *MapItemLine) Path() [][][]float64 {
 		path[0] = append(path[0], pt_entry)
 	}
 	return path
+}
+
+func (mip *MapItemLine) SetID(id string) {
+	mip.id = id
+}
+
+func (mip *MapItemLine) SetDB(db MapDatabase) {
+	mip.db = db
 }
 
 func (mip *MapItemLine) SetProperties(props map[string]interface{}) {
@@ -100,5 +108,17 @@ func (mip *MapItemLine) ToWKT() string {
 
 func (mip *MapItemLine) Save() {
 	if mip.db != nil {
+		props_json, _ := json.Marshal(mip.Properties())
+		props_str := string(props_json)
+		wkt := mip.ToWKT()
+
+		if mip.id == "" {
+			// new MapItem
+			id := mip.db.QueryRow("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id")
+			mip.id = string(id)
+		} else {
+			// update MapItem
+			mip.db.QueryRow("UPDATE mapplz SET geom = ST_GeomFromText('" + wkt + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
+		}
 	}
 }

@@ -45,7 +45,7 @@ func (mp *MapPLZ) ToGeoJson() string {
 }
 
 func (mp *MapPLZ) Add_Geojson_Feature(geojson string) MapItem {
-	mip := ConvertGeojsonFeature(geojson)
+	mip := ConvertGeojsonFeature(geojson, mp.Database)
 	mp.MapItems = append(mp.MapItems, mip)
 
 	return mip

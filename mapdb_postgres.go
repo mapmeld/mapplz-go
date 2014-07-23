@@ -2,7 +2,6 @@ package mapplz
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
 )
@@ -19,17 +18,14 @@ func (psql *PSQLDatabase) Type() string {
 	return "postgis"
 }
 
-func (psql *PSQLDatabase) SetDB(dbinfo interface{}) {
-	psql.db = dbinfo.(*sql.DB)
+func (psql *PSQLDatabase) QueryRow(sql string) int {
+	var id int
+	psql.db.QueryRow(sql).Scan(&id)
+	return id
 }
 
-func (psql *PSQLDatabase) Add(mip MapItem) {
-	var id int
-	props_json, _ := json.Marshal(mip.Properties())
-	props_str := string(props_json)
-	wkt := mip.ToWKT()
-
-	psql.db.QueryRow("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id").Scan(&id)
+func (psql *PSQLDatabase) SetDB(dbinfo interface{}) {
+	psql.db = dbinfo.(*sql.DB)
 }
 
 func (psql *PSQLDatabase) Query() []MapItem {
@@ -44,7 +40,12 @@ func (psql *PSQLDatabase) Query() []MapItem {
 		if err := rows.Scan(&id, &geo, &props); err != nil {
 			fmt.Printf("row scan error: %s", err)
 		}
-		mip := ConvertGeojsonFeature(`{ "type": "Feature", "geometry": ` + geo + `}`)
+		mip := ConvertGeojsonFeature(`{ "type": "Feature", "geometry": `+geo+`}`, nil)
+		mip.SetJsonProperties(props)
+
+		// set id and db later so it's not re-inserted into DB
+		mip.SetID(string(id))
+		mip.SetDB(psql)
 		mitems = append(mitems, mip)
 	}
 	return mitems

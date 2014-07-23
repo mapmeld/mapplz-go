@@ -8,11 +8,6 @@
 * Handle and pass along a massive amount of errors
 * Is there a way to install all dependencies?
 
-## Databases
-
-* Save IDs
-* Working Save() to MapItem
-
 ## Formats
 
 * Return []MapItem from GeoJSON FeatureCollection, remove old types
@@ -25,7 +20,6 @@
 
 ## PostGIS
 
-* Load geo results without putting them into a MapPLZ instance
 * Count by property
 * Query by property
 * Spatial queries
