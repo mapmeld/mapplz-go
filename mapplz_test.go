@@ -231,3 +231,41 @@ func TestGeojsonAllExport(t *testing.T) {
 		t.Errorf("geojson output for all MapItems did not match")
 	}
 }
+
+func TestWithin(t *testing.T) {
+	mapstore := NewMapPLZ()
+	mapstore.Add2(40.1, -70.2)
+	mapstore.Add2(-40, -70)
+
+	pts := mapstore.Within(`{ "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [[[-71, 39], [-71, 41], [-69, 41], [-69, 39], [-71, 39]]] }}`)
+
+	if len(pts) != 1 || pts[0].Lat() != 40.1 || pts[0].Lng() != -70.2 {
+		t.Errorf("did not return point Within GeoJSON")
+	}
+
+	box := [][]float64{{39, -71}, {41, -71}, {41, -69}, {39, -69}, {39, -71}}
+	pts = mapstore.Within(box)
+
+	if len(pts) != 1 || pts[0].Lat() != 40.1 || pts[0].Lng() != -70.2 {
+		t.Errorf("did not return point Within Array")
+	}
+}
+
+func TestNear(t *testing.T) {
+	mapstore := NewMapPLZ()
+	mapstore.Add2(40.1, -70.2)
+	mapstore.Add2(-40, -70)
+
+	pts := mapstore.Near(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-71, 39] }}`, 1)
+
+	if len(pts) != 1 || pts[0].Lat() != 40.1 || pts[0].Lng() != -70.2 {
+		t.Errorf("did not return point from Near GeoJSON")
+	}
+
+	pt := []float64{-39, -71}
+	pts = mapstore.Near(pt, 1)
+
+	if len(pts) != 1 || pts[0].Lat() != -40 || pts[0].Lng() != -70 {
+		t.Errorf("did not return point from Near Array")
+	}
+}

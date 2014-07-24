@@ -16,13 +16,10 @@
 ## No DB
 
 * Query by property
-* Spatial queries
 
 ## PostGIS
 
-* Count by property
-* Query by property
-* Spatial queries
+* Multiple property queries
 
 ## MongoDB
 

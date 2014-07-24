@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kellydunn/golang-geo"
 	gj "github.com/kpawlik/geojson"
+	"math"
 )
 
 type MapItemPoint struct {
@@ -92,4 +93,41 @@ func (mip *MapItemPoint) Save() {
 			mip.db.QueryRow("UPDATE mapplz SET geom = ST_GeomFromText('" + wkt + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
 		}
 	}
+}
+
+func (mip *MapItemPoint) DistanceFrom(center []float64) float64 {
+	return mip.point.GreatCircleDistance(geo.NewPoint(center[0], center[1]))
+}
+
+func (mip *MapItemPoint) Within(area [][]float64) bool {
+	// adapted from polyclip-go by Mateusz Czapliński
+	intersections := 0
+	for i := range area {
+		curr := area[i]
+		ii := i + 1
+		if ii == len(area) {
+			ii = 0
+		}
+		next := area[ii]
+
+		if (mip.Lat() >= next[0] || mip.Lat() <= curr[0]) &&
+			(mip.Lat() >= curr[0] || mip.Lat() <= next[0]) {
+			continue
+		}
+		// Edge is from curr to next.
+
+		if mip.Lng() >= math.Max(curr[1], next[1]) || next[0] == curr[0] {
+			continue
+		}
+
+		// Find where the line intersects...
+		xint := (mip.Lat()-curr[0])*(next[1]-curr[1])/(next[0]-curr[0]) + curr[1]
+		if curr[1] != next[1] && mip.Lng() > xint {
+			continue
+		}
+
+		intersections++
+	}
+
+	return (intersections%2 != 0)
 }

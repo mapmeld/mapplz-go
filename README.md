@@ -64,6 +64,24 @@ mapstore.ToGeoJson() // export all as GeoJSON
 mapstore.Where("color = 'red'") // enter a SQL WHERE clause
 ```
 
+You can make some geospatial queries:
+
+```
+// all MapItems inside this area
+mapstore.Within(`{ "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [[[ ... ]]] } }`)
+mapstore.Within([][]float64{{40, -70}, {40, -110}, {60, -90}, {40, -70}})
+
+// MapItems nearest to a point
+mapstore.Near([]float64{40, -70}, 2)
+mapstore.Near(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }`, 2)
+
+// point in polygon?
+pt.Within([][]float64{{40, -70}, {40, -110}, {60, -90}, {40, -70}})
+
+// distance between points?
+pt.DistanceFrom([]float64{lat, lng})
+```
+
 ## Databases
 
 MapPLZ can integrate with PostGIS and take the complexities out of your hands.
@@ -71,6 +89,10 @@ MapPLZ can integrate with PostGIS and take the complexities out of your hands.
 Here's how you can connect:
 
 ```
+# install PostGIS and create a 'mapplz' table before use
+# here's my schema:
+# CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)
+
 mapstore := NewMapPLZ()
 db, _ := sql.Open("postgres", "user=USER dbname=DB sslmode=SSLMODE")
 mapstore.Database = NewPostGISDB(db)
@@ -89,6 +111,10 @@ mapstore.ToGeoJson()
 * <a href="https://github.com/kpawlik/geojson">geojson</a> from Kris Pawlik (MIT license)
 * <a href="https://github.com/lib/pq">pq</a> (MIT license)
 * <a href="http://labix.org/mgo">mgo</a> (Simplified BSD license) (requires bzr tool)
+
+With additional input from
+
+* <a href="https://github.com/akavel/polyclip-go">polyclip-go</a> (MIT license) from Mateusz Czapliński
 
 ## License
 

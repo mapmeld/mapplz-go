@@ -2,11 +2,29 @@ package mapplz
 
 import (
 	"encoding/json"
+	"sort"
 )
 
 type MapPLZ struct {
 	MapItems []MapItem
 	Database MapDatabase
+}
+
+// define MapItemList for custom distance sorts
+type MapItemVector []MapItem
+type MapItemList struct {
+	Centroid []float64
+	MIV      MapItemVector
+}
+
+func (v MapItemList) Swap(i, j int) {
+	v.MIV[i], v.MIV[j] = v.MIV[j], v.MIV[i]
+}
+func (v MapItemList) Len() int {
+	return len(v.MIV)
+}
+func (v MapItemList) Less(i, j int) bool {
+	return v.MIV[i].DistanceFrom(v.Centroid) < v.MIV[j].DistanceFrom(v.Centroid)
 }
 
 func NewMapPLZ() MapPLZ {
@@ -18,6 +36,8 @@ type MapDatabase interface {
 	Type() string
 	Query(string) []MapItem
 	Count(string) int
+	Within([][]float64) []MapItem
+	Near([]float64, int) []MapItem
 	QueryRow(string) int
 }
 
@@ -34,6 +54,8 @@ type MapItem interface {
 	ToGeoJson() string
 	ToWKT() string
 	Save()
+	Within([][]float64) bool
+	DistanceFrom([]float64) float64
 }
 
 // global add
@@ -333,5 +355,52 @@ func (mp *MapPLZ) Where(sql string) []MapItem {
 		return mp.Database.Query(sql)
 	} else {
 		return mp.MapItems
+	}
+}
+
+func (mp *MapPLZ) Within(area interface{}) []MapItem {
+	area_poly := [][]float64{}
+	area_json, ok := area.(string)
+	if ok {
+		// area_json is a GeoJSON of the poly
+		area_poly = ConvertGeojsonFeature(area_json, nil).Path()[0]
+	} else {
+		// area is a Path
+		area_poly = area.([][]float64)
+	}
+
+	if mp.Database != nil {
+		return mp.Database.Within(area_poly)
+	} else {
+		var responses = []MapItem{}
+		for i := 0; i < len(mp.MapItems); i++ {
+			if mp.MapItems[i].Within(area_poly) {
+				responses = append(responses, mp.MapItems[i])
+			}
+		}
+		return responses
+	}
+}
+
+func (mp *MapPLZ) Near(center interface{}, count int) []MapItem {
+	area_pt := []float64{}
+	area_json, ok := center.(string)
+	if ok {
+		// area_json is a GeoJSON of the point
+		mv := ConvertGeojsonFeature(area_json, nil)
+		area_pt = append(area_pt, mv.Lat())
+		area_pt = append(area_pt, mv.Lng())
+	} else {
+		// area_pt is a coordinate
+		area_pt = center.([]float64)
+	}
+
+	if mp.Database != nil {
+		return mp.Database.Near(area_pt, count)
+	} else {
+		bydistancevector := MapItemVector(mp.MapItems)
+		bydistance := MapItemList{MIV: bydistancevector, Centroid: area_pt}
+		sort.Sort(bydistance)
+		return bydistance.MIV[0:count]
 	}
 }
