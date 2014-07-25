@@ -84,25 +84,30 @@ pt.DistanceFrom([]float64{lat, lng})
 
 ## Databases
 
-MapPLZ can integrate with PostGIS and take the complexities out of your hands.
+MapPLZ can set up geospatial data with PostGIS or MongoDB, and take the complexities out of your hands.
 
 Here's how you can connect:
 
+#### PostGIS
 ```
-# install PostGIS and create a 'mapplz' table before use
-# here's my schema:
-# CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)
+// install PostGIS and create a 'mapplz' table before use
+// here's my schema:
+// CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)
 
 mapstore := NewMapPLZ()
 db, _ := sql.Open("postgres", "user=USER dbname=DB sslmode=SSLMODE")
 mapstore.Database = NewPostGISDB(db)
+```
 
-// adding, updating, querying, and exporting data works the same way
-pt := mapstore.Add_Lat_Lng(40, -70)
-pt.SetJsonProperties(`{ "color": "red" }`)
-mapstore.Count("")
-mapstore.Where("color = 'red'")
-mapstore.ToGeoJson()
+#### MongoDB
+
+```
+// MongoDB puts a geospatial index on 'geo' and stores other fields in 'props'
+mapstore := NewMapPLZ()
+session, err := mgo.Dial("localhost")
+defer session.Close()
+collection := session.DB("sample").C("mapplz")
+mapstore.Database = NewMongoDatabase(collection)
 ```
 
 ## Packages

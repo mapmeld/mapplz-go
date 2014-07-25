@@ -38,7 +38,8 @@ type MapDatabase interface {
 	Count(string) int
 	Within([][]float64) []MapItem
 	Near([]float64, int) []MapItem
-	QueryRow(string) int
+	QueryRow(string) string
+	Save(interface{}) string
 }
 
 type MapItem interface {

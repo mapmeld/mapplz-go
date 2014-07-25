@@ -19,10 +19,14 @@ func (psql *PSQLDatabase) Type() string {
 	return "postgis"
 }
 
-func (psql *PSQLDatabase) QueryRow(sql string) int {
+func (psql *PSQLDatabase) QueryRow(sql string) string {
 	var id int
 	psql.db.QueryRow(sql).Scan(&id)
-	return id
+	return fmt.Sprintf("%v", id)
+}
+
+func (psql *PSQLDatabase) Save(sql interface{}) string {
+	return psql.QueryRow(sql.(string))
 }
 
 func (psql *PSQLDatabase) Query(sql string) []MapItem {

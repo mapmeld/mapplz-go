@@ -127,11 +127,11 @@ func (mip *MapItemLine) Save() {
 
 		if mip.id == "" {
 			// new MapItem
-			id := mip.db.QueryRow("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id")
-			mip.id = fmt.Sprintf("%v", id)
+			id := mip.db.Save("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id")
+			mip.id = id
 		} else {
 			// update MapItem
-			mip.db.QueryRow("UPDATE mapplz SET geom = ST_GeomFromText('" + wkt + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
+			mip.db.Save("UPDATE mapplz SET geom = ST_GeomFromText('" + wkt + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
 		}
 	}
 }

@@ -23,7 +23,6 @@
 
 ## MongoDB
 
-* Document bzr install, get working on Travis CI
 * Write
 
 ## Spatialite?
