@@ -3,7 +3,6 @@ package mapplz
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"fmt"
 )
 
 type MongoDatabase struct {
@@ -42,7 +41,7 @@ func (mdb *MongoDatabase) Save(mquery interface{}) string {
 	return new_id.String()
 }
 
-func (mdb *MongoDatabase) Query(sql string) []MapItem {
+func (mdb *MongoDatabase) Query(query interface{}) []MapItem {
 	mitems := []MapItem{}
 
 	var results []interface{}
@@ -50,7 +49,6 @@ func (mdb *MongoDatabase) Query(sql string) []MapItem {
 
 	for i := 0; i < len(results); i++ {
 		result_map := results[i].(bson.M)
-		fmt.Printf("%s", result_map)
 		mip := ConvertGeojsonFeature(result_map["geo"].(string), nil)
 		bson_id := result_map["_id"].(bson.ObjectId)
 		mip.SetID(bson_id.String())
@@ -61,8 +59,14 @@ func (mdb *MongoDatabase) Query(sql string) []MapItem {
 	return mitems
 }
 
-func (mdb *MongoDatabase) Count(sql string) int {
-  return 0
+func (mdb *MongoDatabase) Count(query interface{}) int {
+  mdoc := query.(map[string]interface{})
+	mquery := bson.M{}
+	for key := range mdoc {
+		mquery[key] = mdoc[key]
+	}
+	count, _ := mdb.collection.Find(mquery).Count()
+	return count
 }
 
 func (mdb *MongoDatabase) Within(area [][]float64) []MapItem {

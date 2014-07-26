@@ -9,9 +9,6 @@ addons:
 services:
   - mongodb
 
-before_install:
-  - sudo apt-get install -y bzr
-
 install:
   - go get github.com/lib/pq
   - go get github.com/kellydunn/golang-geo
