@@ -3,6 +3,7 @@ package mapplz
 import (
 	"encoding/json"
 	"sort"
+	gj "github.com/mapmeld/geojson-bson"
 )
 
 type MapPLZ struct {
@@ -53,6 +54,7 @@ type MapItem interface {
 	Properties() map[string]interface{}
 	SetJsonProperties(string)
 	ToGeoJson() string
+	ToGeoJsonFeature() *gj.Feature
 	ToWKT() string
 	Save()
 	Within([][]float64) bool

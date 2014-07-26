@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kellydunn/golang-geo"
-	gj "github.com/kpawlik/geojson"
+	gj "github.com/mapmeld/geojson-bson"
 	"math"
 )
 
@@ -62,11 +62,15 @@ func (mip *MapItemPoint) Properties() map[string]interface{} {
 	return mip.properties
 }
 
-func (mip *MapItemPoint) ToGeoJson() string {
+func (mip *MapItemPoint) ToGeoJsonFeature() *gj.Feature {
 	lng := gj.CoordType(mip.Lng())
 	lat := gj.CoordType(mip.Lat())
 	pt := gj.NewPoint(gj.Coordinate{lng, lat})
-	feature := gj.NewFeature(pt, nil, nil)
+	return gj.NewFeature(pt, nil, nil)
+}
+
+func (mip *MapItemPoint) ToGeoJson() string {
+	feature := mip.ToGeoJsonFeature()
 	gjstr, err := gj.Marshal(feature)
 	if err != nil {
 		panic("failed to export point to GeoJSON")
@@ -93,7 +97,7 @@ func (mip *MapItemPoint) Save() {
 				for key := range props {
 					mdoc[key] = props[key]
 				}
-				mdoc["geo"] = mip.ToGeoJson()
+				mdoc["geo"] = mip.ToGeoJsonFeature()
 				id = mip.db.Save(mdoc)
 			}
 			mip.id = id
@@ -110,7 +114,7 @@ func (mip *MapItemPoint) Save() {
 				for key := range props {
 					mdoc[key] = props[key]
 				}
-				mdoc["geo"] = mip.ToGeoJson()
+				mdoc["geo"] = mip.ToGeoJsonFeature()
 				mip.db.Save(mdoc)
 			}
 		}

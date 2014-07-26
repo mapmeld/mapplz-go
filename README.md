@@ -107,13 +107,15 @@ mapstore := NewMapPLZ()
 session, err := mgo.Dial("localhost")
 defer session.Close()
 collection := session.DB("sample").C("mapplz")
+geoindex := mgo.Index{Key: []string{"$2dsphere:geo.geometry"}, Bits: 26}
+collection.EnsureIndex(geoindex)
 mapstore.Database = NewMongoDatabase(collection)
 ```
 
 ## Packages
 
 * <a href="https://github.com/kellydunn/golang-geo">golang-geo</a> from Kelly Dunn (MIT license)
-* <a href="https://github.com/kpawlik/geojson">geojson</a> from Kris Pawlik (MIT license)
+* <a href="https://github.com/mapmeld/geojson-bson">geojson-bson</a> based on geojson from Kris Pawlik (MIT license)
 * <a href="https://github.com/lib/pq">pq</a> (MIT license)
 * <a href="http://gopkg.in/mgo.v2">mgo</a> (Simplified BSD license)
 

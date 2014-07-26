@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kellydunn/golang-geo"
-	gj "github.com/kpawlik/geojson"
+	gj "github.com/mapmeld/geojson-bson"
 	"math"
 )
 
@@ -87,7 +87,7 @@ func (mip *MapItemLine) Properties() map[string]interface{} {
 	return mip.properties
 }
 
-func (mip *MapItemLine) ToGeoJson() string {
+func (mip *MapItemLine) ToGeoJsonFeature() *gj.Feature {
 	path_pts := mip.path.Points()
 	var coords = []gj.Coordinate{}
 
@@ -98,7 +98,11 @@ func (mip *MapItemLine) ToGeoJson() string {
 	}
 
 	gj_line := gj.NewLineString(gj.Coordinates(coords))
-	feature := gj.NewFeature(gj_line, nil, nil)
+	return gj.NewFeature(gj_line, nil, nil)
+}
+
+func (mip *MapItemLine) ToGeoJson() string {
+	feature := mip.ToGeoJsonFeature()
 
 	gjstr, err := gj.Marshal(feature)
 	if err != nil {
