@@ -12,7 +12,7 @@ services:
 install:
   - go get github.com/lib/pq
   - go get github.com/kellydunn/golang-geo
-  - go get github.com/kpawlik/geojson
+  - go get github.com/mapmeld/geojson-bson
   - go get gopkg.in/mgo.v2
 
 before_script:
