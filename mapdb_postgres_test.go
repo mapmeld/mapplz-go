@@ -160,3 +160,40 @@ func TestNearPSQL(t *testing.T) {
 
 	db.Exec("DROP TABLE mapplz")
 }
+
+func TestLngLatPathJsonGIS(t *testing.T) {
+	mapstore := NewMapPLZ()
+	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
+	if err != nil {
+		t.Errorf("did not connect to PostGIS")
+	}
+	db.Exec("CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)")
+	mapstore.Database = NewPostGISDB(db)
+
+	linepts := [][]float64{{-70, 40}, {-110, 23.2}}
+	line := mapstore.Add_LngLatPath_Json(linepts, `{ "color": "#f00" }`)
+	if line.Properties()["color"] != "#f00" {
+		t.Errorf("properties not added to lnglat path on PostGIS")
+	}
+
+	db.Exec("DROP TABLE mapplz")
+}
+
+func TestLatLngPolyGIS(t *testing.T) {
+	mapstore := NewMapPLZ()
+	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
+	if err != nil {
+		t.Errorf("did not connect to PostGIS")
+	}
+	db.Exec("CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)")
+	mapstore.Database = NewPostGISDB(db)
+
+	linepts := [][]float64{{40, -70}, {23.2, -110}, {25.2, -110}, {42.2, -70}, {40, -70}}
+	line := mapstore.Add_LatLngPoly(linepts)
+	first_pt := line.Path()[0][0]
+	if first_pt[0] != 40 || first_pt[1] != -70 {
+		t.Errorf("line not made from latlng path on PostGIS")
+	}
+
+	db.Exec("DROP TABLE mapplz")
+}

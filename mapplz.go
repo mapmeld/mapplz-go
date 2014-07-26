@@ -2,8 +2,8 @@ package mapplz
 
 import (
 	"encoding/json"
-	"sort"
 	gj "github.com/mapmeld/geojson-bson"
+	"sort"
 )
 
 type MapPLZ struct {

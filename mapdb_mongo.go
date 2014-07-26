@@ -20,7 +20,7 @@ func (mdb *MongoDatabase) Type() string {
 }
 
 func (mdb *MongoDatabase) QueryRow(sql string) string {
-  return "0"
+	return "0"
 }
 
 func (mdb *MongoDatabase) Save(mquery interface{}) string {
@@ -59,18 +59,18 @@ func (mdb *MongoDatabase) Save(mquery interface{}) string {
 func (mdb *MongoDatabase) Query(query interface{}) []MapItem {
 	mdoc := bson.M{}
 	if query != nil {
-  	query_map := query.(map[string]interface{})
-  	for qk := range query_map {
+		query_map := query.(map[string]interface{})
+		for qk := range query_map {
 			if qk != "id" && qk != "_id" {
-  	  	mdoc[qk] = query_map[qk]
+				mdoc[qk] = query_map[qk]
 			}
-	  }
+		}
 	}
 
 	var results []interface{}
 	mdb.collection.Find(mdoc).All(&results)
 
-  mitems := []MapItem{}
+	mitems := []MapItem{}
 	for i := 0; i < len(results); i++ {
 		result_map := results[i].(bson.M)
 		geo_str, _ := json.Marshal(result_map["geo"])
@@ -80,16 +80,16 @@ func (mdb *MongoDatabase) Query(query interface{}) []MapItem {
 		if ok {
 			mip.SetID(string_id)
 		} else {
-  		bson_id := result_map["_id"].(bson.ObjectId)
-	  	mip.SetID(mdb.sanitize(bson_id.String()))
+			bson_id := result_map["_id"].(bson.ObjectId)
+			mip.SetID(mdb.sanitize(bson_id.String()))
 		}
 
 		props_map := make(map[string]interface{})
 		for key := range result_map {
-			if (key != "_id" && key != "id" && key != "geo") {
+			if key != "_id" && key != "id" && key != "geo" {
 				props_map[key] = result_map[key]
-		  }
-	  }
+			}
+		}
 		mip.SetProperties(props_map)
 
 		mip.SetDB(mdb)
@@ -102,10 +102,10 @@ func (mdb *MongoDatabase) Count(query interface{}) int {
 	mquery := bson.M{}
 
 	if query != nil {
-  	mdoc := query.(map[string]interface{})
-	  for key := range mdoc {
-		  mquery[key] = mdoc[key]
-	  }
+		mdoc := query.(map[string]interface{})
+		for key := range mdoc {
+			mquery[key] = mdoc[key]
+		}
 	}
 
 	count, _ := mdb.collection.Find(mquery).Count()
@@ -127,7 +127,7 @@ func (mdb *MongoDatabase) Within(area [][]float64) []MapItem {
 
 	geometry := make(map[string]interface{})
 	geometry["$geometry"] = gjson
-  gw := make(map[string]interface{})
+	gw := make(map[string]interface{})
 	gw["$geoWithin"] = geometry
 
 	qi := make(map[string]interface{})
@@ -137,7 +137,7 @@ func (mdb *MongoDatabase) Within(area [][]float64) []MapItem {
 }
 
 func (mdb *MongoDatabase) Near(center []float64, count int) []MapItem {
-  gjson := make(map[string]interface{})
+	gjson := make(map[string]interface{})
 	gjson["type"] = "Point"
 	gjson["coordinates"] = []float64{center[1], center[0]}
 

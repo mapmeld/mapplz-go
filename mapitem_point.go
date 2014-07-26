@@ -90,7 +90,7 @@ func (mip *MapItemPoint) Save() {
 			if mip.db.Type() == "postgis" {
 				props_json, _ := json.Marshal(mip.Properties())
 				props_str := string(props_json)
-			  id = mip.db.Save("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + mip.ToWKT() + "')) RETURNING id")
+				id = mip.db.Save("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + mip.ToWKT() + "')) RETURNING id")
 			} else {
 				mdoc := make(map[string]interface{})
 				props := mip.Properties()
@@ -106,7 +106,7 @@ func (mip *MapItemPoint) Save() {
 			if mip.db.Type() == "postgis" {
 				props_json, _ := json.Marshal(mip.Properties())
 				props_str := string(props_json)
-  			mip.db.Save("UPDATE mapplz SET geom = ST_GeomFromText('" + mip.ToWKT() + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
+				mip.db.Save("UPDATE mapplz SET geom = ST_GeomFromText('" + mip.ToWKT() + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
 			} else {
 				mdoc := make(map[string]interface{})
 				mdoc["id"] = mip.id

@@ -1,8 +1,8 @@
 package mapplz
 
 import (
-	"testing"
 	"gopkg.in/mgo.v2"
+	"testing"
 )
 
 func TestSaveToMongo(t *testing.T) {
@@ -15,7 +15,7 @@ func TestSaveToMongo(t *testing.T) {
 	}
 
 	collection := session.DB("sample").C("mapplz")
-  collection.DropCollection()
+	collection.DropCollection()
 	mapstore.Database = NewMongoDatabase(collection)
 
 	mapstore.Add2(40.1, -70.2)
@@ -44,7 +44,7 @@ func TestMongoCount(t *testing.T) {
 		t.Errorf("did not count MongoDB points")
 	}
 
-  mquery := make(map[string]interface{})
+	mquery := make(map[string]interface{})
 	mquery["color"] = "blue"
 	if mapstore.Count(mquery) != 1 {
 		t.Errorf("did not filter MongoDB points in Count")
@@ -66,8 +66,8 @@ func TestMongoWhere(t *testing.T) {
 	mapstore.Add3(40.1, -70.2, `{ "color": "red" }`)
 	mapstore.Add3(40.2, -70.3, `{ "color": "blue" }`)
 
-  mquery := make(map[string]interface{})
-  mquery["color"] = "blue"
+	mquery := make(map[string]interface{})
+	mquery["color"] = "blue"
 	pt := mapstore.Where(mquery)[0]
 	if pt.Lat() != 40.2 || pt.Lng() != -70.3 {
 		t.Errorf("did not filter MongoDB points in Where")
@@ -166,6 +166,49 @@ func TestNearMongo(t *testing.T) {
 
 	if len(pts) != 1 || pts[0].Lat() != -40 || pts[0].Lng() != -70 {
 		t.Errorf("did not return point from MongoDB Near Array")
+	}
+
+	collection.DropCollection()
+}
+
+func TestLngLatPathJsonMongo(t *testing.T) {
+	mapstore := NewMapPLZ()
+	session, err := mgo.Dial("localhost")
+	defer session.Close()
+	if err != nil {
+		t.Errorf("did not connect to MongoDB")
+	}
+	collection := session.DB("sample").C("mapplz")
+	geoindex := mgo.Index{Key: []string{"$2dsphere:geo.geometry"}, Bits: 26}
+	collection.EnsureIndex(geoindex)
+	mapstore.Database = NewMongoDatabase(collection)
+
+	linepts := [][]float64{{-70, 40}, {-110, 23.2}}
+	line := mapstore.Add_LngLatPath_Json(linepts, `{ "color": "#f00" }`)
+	if line.Properties()["color"] != "#f00" {
+		t.Errorf("properties not added to lnglat path on MongoDB")
+	}
+
+	collection.DropCollection()
+}
+
+func TestLatLngPolyMongo(t *testing.T) {
+	mapstore := NewMapPLZ()
+	session, err := mgo.Dial("localhost")
+	defer session.Close()
+	if err != nil {
+		t.Errorf("did not connect to MongoDB")
+	}
+	collection := session.DB("sample").C("mapplz")
+	geoindex := mgo.Index{Key: []string{"$2dsphere:geo.geometry"}, Bits: 26}
+	collection.EnsureIndex(geoindex)
+	mapstore.Database = NewMongoDatabase(collection)
+
+	linepts := [][]float64{{40, -70}, {23.2, -110}, {25.2, -110}, {42.2, -70}, {40, -70}}
+	line := mapstore.Add_LatLngPoly(linepts)
+	first_pt := line.Path()[0][0]
+	if first_pt[0] != 40 || first_pt[1] != -70 {
+		t.Errorf("line not made from latlng path on MongoDB")
 	}
 
 	collection.DropCollection()

@@ -124,7 +124,7 @@ func TestLngLatPathJson(t *testing.T) {
 
 func TestLatLngPoly(t *testing.T) {
 	mapstore := NewMapPLZ()
-	linepts := [][]float64{{40, -70}, {23.2, -110}}
+	linepts := [][]float64{{40, -70}, {23.2, -110}, {25.2, -110}, {42.2, -70}, {40, -70}}
 	line := mapstore.Add_LatLngPoly(linepts)
 	first_pt := line.Path()[0][0]
 	if first_pt[0] != 40 || first_pt[1] != -70 {
@@ -134,7 +134,7 @@ func TestLatLngPoly(t *testing.T) {
 
 func TestLngLatPoly(t *testing.T) {
 	mapstore := NewMapPLZ()
-	linepts := [][]float64{{-70, 40}, {-110, 23.2}}
+	linepts := [][]float64{{-70, 40}, {-110, 23.2}, {-110, 25.2}, {-70, 42.2}, {-70, 40}}
 	line := mapstore.Add_LngLatPoly(linepts)
 	first_pt := line.Path()[0][0]
 	if first_pt[0] != 40 || first_pt[1] != -70 {
@@ -189,7 +189,7 @@ func TestGeojsonFeatureCollection(t *testing.T) {
 	gj := `{ "type": "FeatureCollection", "features": [{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70, 40] } }]}`
 	gj_fc := mapstore.Add_Geojson_Collection(gj)
 
-	if gj_fc.Features[0].Geometry.Point.Coordinates[0] != -70 || gj_fc.Features[0].Geometry.Point.Coordinates[1] != 40 {
+	if gj_fc[0].Lng() != -70 || gj_fc[0].Lat() != 40 {
 		t.Errorf("geojson featurecollection not made")
 	}
 }
