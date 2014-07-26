@@ -33,7 +33,7 @@ type GeojsonFeature struct {
 
 type GeojsonFeatureCollection struct {
 	Type     string
-	Features []string
+	Features []json.RawMessage
 }
 
 func (mp *MapPLZ) ToGeoJson() string {
@@ -63,7 +63,7 @@ func (mp *MapPLZ) Add_Geojson_Collection(geojson string) []MapItem {
 
 	for i := range geojsonData.Features {
 		t := geojsonData.Features[i]
-		featureList = append(featureList, ConvertGeojsonFeature(t, mp.Database))
+		featureList = append(featureList, ConvertGeojsonFeature(string(t), mp.Database))
 	}
 
 	return featureList
