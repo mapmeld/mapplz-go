@@ -19,13 +19,18 @@ func (psql *PSQLDatabase) Type() string {
 	return "postgis"
 }
 
-func (psql *PSQLDatabase) QueryRow(sql string) int {
+func (psql *PSQLDatabase) QueryRow(sql string) string {
 	var id int
 	psql.db.QueryRow(sql).Scan(&id)
-	return id
+	return fmt.Sprintf("%v", id)
 }
 
-func (psql *PSQLDatabase) Query(sql string) []MapItem {
+func (psql *PSQLDatabase) Save(sql interface{}) string {
+	return psql.QueryRow(sql.(string))
+}
+
+func (psql *PSQLDatabase) Query(query interface{}) []MapItem {
+	sql := query.(string)
 	if sql == "" {
 		sql = "SELECT id, ST_AsGeoJSON(geom) AS geo, properties FROM mapplz"
 	} else {
@@ -38,7 +43,8 @@ func (psql *PSQLDatabase) Query(sql string) []MapItem {
 	return psql.responses(rows)
 }
 
-func (psql *PSQLDatabase) Count(sql string) int {
+func (psql *PSQLDatabase) Count(query interface{}) int {
+	sql := query.(string)
 	if sql == "" {
 		sql = "SELECT COUNT(*) FROM mapplz"
 	} else {

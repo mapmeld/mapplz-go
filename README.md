@@ -56,12 +56,19 @@ line.Type() == "line"
 line.Path() == [[[40, -70], [50, 20]]]
 line.Properties()["color"]
 
+mapstore.ToGeoJson() // export all as GeoJSON
 mapstore.Count("") == 2  // MapItems count ("" selects all)
 mapstore.Query("") // array of all MapItems ("" selects all)
-mapstore.ToGeoJson() // export all as GeoJSON
 
-// currently unsupported without PostGIS
-mapstore.Where("color = 'red'") // enter a SQL WHERE clause
+// supported with PostGIS
+mapstore.Where("color = 'red'") // enter a SQL WHERE clause with one property
+mapstore.Count("color = 'white' OR color = 'blue'")
+
+// supported with MongoDB
+query = make(map[string]interface{})
+query["color"] = "red"
+mapstore.Query(query)
+mapstore.Count(query)
 ```
 
 You can make some geospatial queries:
@@ -84,33 +91,41 @@ pt.DistanceFrom([]float64{lat, lng})
 
 ## Databases
 
-MapPLZ can integrate with PostGIS and take the complexities out of your hands.
+MapPLZ can set up geospatial data with PostGIS or MongoDB, and take the complexities out of your hands.
 
 Here's how you can connect:
 
+#### PostGIS
 ```
-# install PostGIS and create a 'mapplz' table before use
-# here's my schema:
-# CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)
+// install PostGIS and create a 'mapplz' table before use
+// here's my schema:
+// CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)
 
 mapstore := NewMapPLZ()
 db, _ := sql.Open("postgres", "user=USER dbname=DB sslmode=SSLMODE")
 mapstore.Database = NewPostGISDB(db)
+```
 
-// adding, updating, querying, and exporting data works the same way
-pt := mapstore.Add_Lat_Lng(40, -70)
-pt.SetJsonProperties(`{ "color": "red" }`)
-mapstore.Count("")
-mapstore.Where("color = 'red'")
-mapstore.ToGeoJson()
+#### MongoDB
+
+```
+// install MongoDB and create a db and collection
+mapstore := NewMapPLZ()
+session, err := mgo.Dial("localhost")
+defer session.Close()
+collection := session.DB("sample").C("mapplz")
+// put a geospatial index on 'geo.geometry'
+geoindex := mgo.Index{Key: []string{"$2dsphere:geo.geometry"}, Bits: 26}
+collection.EnsureIndex(geoindex)
+mapstore.Database = NewMongoDatabase(collection)
 ```
 
 ## Packages
 
 * <a href="https://github.com/kellydunn/golang-geo">golang-geo</a> from Kelly Dunn (MIT license)
-* <a href="https://github.com/kpawlik/geojson">geojson</a> from Kris Pawlik (MIT license)
+* <a href="https://github.com/mapmeld/geojson-bson">geojson-bson</a> based on geojson from Kris Pawlik (MIT license)
 * <a href="https://github.com/lib/pq">pq</a> (MIT license)
-* <a href="http://labix.org/mgo">mgo</a> (Simplified BSD license) (requires bzr tool)
+* <a href="http://gopkg.in/mgo.v2">mgo</a> (Simplified BSD license)
 
 With additional input from
 

@@ -10,7 +10,6 @@
 
 ## Formats
 
-* Return []MapItem from GeoJSON FeatureCollection, remove old types
 * Always return an array of MapItems (or maybe singleton if there's only one)
 
 ## No DB
@@ -20,10 +19,5 @@
 ## PostGIS
 
 * Multiple property queries
-
-## MongoDB
-
-* Document bzr install, get working on Travis CI
-* Write
 
 ## Spatialite?

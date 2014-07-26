@@ -2,6 +2,7 @@ package mapplz
 
 import (
 	"encoding/json"
+	gj "github.com/mapmeld/geojson-bson"
 	"sort"
 )
 
@@ -34,11 +35,12 @@ func NewMapPLZ() MapPLZ {
 
 type MapDatabase interface {
 	Type() string
-	Query(string) []MapItem
-	Count(string) int
+	Query(interface{}) []MapItem
+	Count(interface{}) int
 	Within([][]float64) []MapItem
 	Near([]float64, int) []MapItem
-	QueryRow(string) int
+	QueryRow(string) string
+	Save(interface{}) string
 }
 
 type MapItem interface {
@@ -52,6 +54,7 @@ type MapItem interface {
 	Properties() map[string]interface{}
 	SetJsonProperties(string)
 	ToGeoJson() string
+	ToGeoJsonFeature() *gj.Feature
 	ToWKT() string
 	Save()
 	Within([][]float64) bool
@@ -334,28 +337,24 @@ func (mp *MapPLZ) Add_LngLatPoly_Json(path [][]float64, props string) MapItem {
 
 // database queries
 
-func (mp *MapPLZ) Count(sql string) int {
+func (mp *MapPLZ) Count(query interface{}) int {
 	if mp.Database != nil {
-		return mp.Database.Count(sql)
+		return mp.Database.Count(query)
 	} else {
 		return len(mp.MapItems)
 	}
 }
 
-func (mp *MapPLZ) Query(sql string) []MapItem {
+func (mp *MapPLZ) Query(query interface{}) []MapItem {
 	if mp.Database != nil {
-		return mp.Database.Query(sql)
+		return mp.Database.Query(query)
 	} else {
 		return mp.MapItems
 	}
 }
 
-func (mp *MapPLZ) Where(sql string) []MapItem {
-	if mp.Database != nil {
-		return mp.Database.Query(sql)
-	} else {
-		return mp.MapItems
-	}
+func (mp *MapPLZ) Where(query interface{}) []MapItem {
+	return mp.Query(query)
 }
 
 func (mp *MapPLZ) Within(area interface{}) []MapItem {

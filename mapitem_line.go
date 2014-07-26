@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kellydunn/golang-geo"
-	gj "github.com/kpawlik/geojson"
+	gj "github.com/mapmeld/geojson-bson"
 	"math"
 )
 
@@ -87,7 +87,7 @@ func (mip *MapItemLine) Properties() map[string]interface{} {
 	return mip.properties
 }
 
-func (mip *MapItemLine) ToGeoJson() string {
+func (mip *MapItemLine) ToGeoJsonFeature() *gj.Feature {
 	path_pts := mip.path.Points()
 	var coords = []gj.Coordinate{}
 
@@ -98,7 +98,11 @@ func (mip *MapItemLine) ToGeoJson() string {
 	}
 
 	gj_line := gj.NewLineString(gj.Coordinates(coords))
-	feature := gj.NewFeature(gj_line, nil, nil)
+	return gj.NewFeature(gj_line, nil, nil)
+}
+
+func (mip *MapItemLine) ToGeoJson() string {
+	feature := mip.ToGeoJsonFeature()
 
 	gjstr, err := gj.Marshal(feature)
 	if err != nil {
@@ -121,17 +125,39 @@ func (mip *MapItemLine) ToWKT() string {
 
 func (mip *MapItemLine) Save() {
 	if mip.db != nil {
-		props_json, _ := json.Marshal(mip.Properties())
-		props_str := string(props_json)
-		wkt := mip.ToWKT()
-
 		if mip.id == "" {
 			// new MapItem
-			id := mip.db.QueryRow("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + wkt + "')) RETURNING id")
-			mip.id = fmt.Sprintf("%v", id)
+			var id string
+			if mip.db.Type() == "postgis" {
+				props_json, _ := json.Marshal(mip.Properties())
+				props_str := string(props_json)
+				id = mip.db.Save("INSERT INTO mapplz (properties, geom) VALUES ('" + props_str + "', ST_GeomFromText('" + mip.ToWKT() + "')) RETURNING id")
+			} else {
+				mdoc := make(map[string]interface{})
+				props := mip.Properties()
+				for key := range props {
+					mdoc[key] = props[key]
+				}
+				mdoc["geo"] = mip.ToGeoJsonFeature()
+				id = mip.db.Save(mdoc)
+			}
+			mip.id = id
 		} else {
 			// update MapItem
-			mip.db.QueryRow("UPDATE mapplz SET geom = ST_GeomFromText('" + wkt + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
+			if mip.db.Type() == "postgis" {
+				props_json, _ := json.Marshal(mip.Properties())
+				props_str := string(props_json)
+				mip.db.Save("UPDATE mapplz SET geom = ST_GeomFromText('" + mip.ToWKT() + "'), properties = '" + props_str + "' WHERE id = " + mip.id)
+			} else {
+				mdoc := make(map[string]interface{})
+				mdoc["id"] = mip.id
+				props := mip.Properties()
+				for key := range props {
+					mdoc[key] = props[key]
+				}
+				mdoc["geo"] = mip.ToGeoJsonFeature()
+				mip.db.Save(mdoc)
+			}
 		}
 	}
 }
