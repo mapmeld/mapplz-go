@@ -197,3 +197,21 @@ func TestLatLngPolyGIS(t *testing.T) {
 
 	db.Exec("DROP TABLE mapplz")
 }
+
+func TestPGISDelete(t *testing.T) {
+	mapstore := NewMapPLZ()
+	db, err := sql.Open("postgres", "user=postgres dbname=travis_postgis sslmode=disable")
+	if err != nil {
+		t.Errorf("did not connect to PostGIS")
+	}
+	db.Exec("CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)")
+	mapstore.Database = NewPostGISDB(db)
+
+	pt := mapstore.Add_Lng_Lat(-70, 40)
+	pt.Delete()
+	if mapstore.Count("") != 0 {
+		t.Errorf("did not delete point from PostGIS")
+	}
+
+	db.Exec("DROP TABLE mapplz")
+}

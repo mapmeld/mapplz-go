@@ -213,3 +213,22 @@ func TestLatLngPolyMongo(t *testing.T) {
 
 	collection.DropCollection()
 }
+
+func TestMongoDelete(t *testing.T) {
+	mapstore := NewMapPLZ()
+	session, err := mgo.Dial("localhost")
+	defer session.Close()
+	if err != nil {
+		t.Errorf("did not connect to MongoDB")
+	}
+	collection := session.DB("sample").C("mapplz")
+	mapstore.Database = NewMongoDatabase(collection)
+
+	pt := mapstore.Add_Lng_Lat(-70, 40)
+	pt.Delete()
+	if mapstore.Count("") != 0 {
+		t.Errorf("did not delete point from MongoDB")
+	}
+
+	collection.DropCollection()
+}

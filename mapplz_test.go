@@ -269,3 +269,12 @@ func TestNear(t *testing.T) {
 		t.Errorf("did not return point from Near Array")
 	}
 }
+
+func TestDelete(t *testing.T) {
+	mapstore := NewMapPLZ()
+	pt := mapstore.Add_Lng_Lat(-70, 40)
+	pt.Delete()
+	if mapstore.Count("") != 0 {
+		t.Errorf("did not delete point from nodb MapItems")
+	}
+}

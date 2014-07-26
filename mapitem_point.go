@@ -12,12 +12,13 @@ type MapItemPoint struct {
 	id         string
 	db         MapDatabase
 	point      *geo.Point
+	deleted    bool
 	properties map[string]interface{}
 }
 
 func NewMapItemPoint(lat float64, lng float64, db MapDatabase) *MapItemPoint {
 	pt := geo.NewPoint(lat, lng)
-	return &MapItemPoint{point: pt, properties: make(map[string]interface{}), db: db}
+	return &MapItemPoint{point: pt, properties: make(map[string]interface{}), db: db, deleted: false}
 }
 
 func (mip *MapItemPoint) Type() string {
@@ -119,6 +120,18 @@ func (mip *MapItemPoint) Save() {
 			}
 		}
 	}
+}
+
+func (mip *MapItemPoint) Delete() {
+	mip.deleted = true
+	if mip.db != nil && mip.id != "" {
+		// delete MapItem
+		mip.db.Delete(mip.id)
+	}
+}
+
+func (mip *MapItemPoint) Deleted() bool {
+	return mip.deleted
 }
 
 func (mip *MapItemPoint) DistanceFrom(center []float64) float64 {

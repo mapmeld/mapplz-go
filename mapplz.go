@@ -41,6 +41,7 @@ type MapDatabase interface {
 	Near([]float64, int) []MapItem
 	QueryRow(string) string
 	Save(interface{}) string
+	Delete(string)
 }
 
 type MapItem interface {
@@ -57,6 +58,8 @@ type MapItem interface {
 	ToGeoJsonFeature() *gj.Feature
 	ToWKT() string
 	Save()
+	Delete()
+	Deleted() bool
 	Within([][]float64) bool
 	DistanceFrom([]float64) float64
 }
@@ -341,7 +344,7 @@ func (mp *MapPLZ) Count(query interface{}) int {
 	if mp.Database != nil {
 		return mp.Database.Count(query)
 	} else {
-		return len(mp.MapItems)
+		return len(mp.NotNil(mp.MapItems))
 	}
 }
 
@@ -349,12 +352,22 @@ func (mp *MapPLZ) Query(query interface{}) []MapItem {
 	if mp.Database != nil {
 		return mp.Database.Query(query)
 	} else {
-		return mp.MapItems
+		return mp.NotNil(mp.MapItems)
 	}
 }
 
 func (mp *MapPLZ) Where(query interface{}) []MapItem {
 	return mp.Query(query)
+}
+
+func (mp *MapPLZ) NotNil(items []MapItem) []MapItem {
+	var response []MapItem
+	for i := 0; i < len(items); i++ {
+		if !items[i].Deleted() {
+			response = append(response, items[i])
+		}
+	}
+	return response
 }
 
 func (mp *MapPLZ) Within(area interface{}) []MapItem {
@@ -373,7 +386,7 @@ func (mp *MapPLZ) Within(area interface{}) []MapItem {
 	} else {
 		var responses = []MapItem{}
 		for i := 0; i < len(mp.MapItems); i++ {
-			if mp.MapItems[i].Within(area_poly) {
+			if !mp.MapItems[i].Deleted() && mp.MapItems[i].Within(area_poly) {
 				responses = append(responses, mp.MapItems[i])
 			}
 		}
@@ -397,7 +410,7 @@ func (mp *MapPLZ) Near(center interface{}, count int) []MapItem {
 	if mp.Database != nil {
 		return mp.Database.Near(area_pt, count)
 	} else {
-		bydistancevector := MapItemVector(mp.MapItems)
+		bydistancevector := MapItemVector(mp.NotNil(mp.MapItems))
 		bydistance := MapItemList{MIV: bydistancevector, Centroid: area_pt}
 		sort.Sort(bydistance)
 		return bydistance.MIV[0:count]

@@ -23,6 +23,11 @@ func (mdb *MongoDatabase) QueryRow(sql string) string {
 	return "0"
 }
 
+func (mdb *MongoDatabase) Delete(id string) {
+	query_id := bson.M{"_id": bson.ObjectIdHex(id)}
+	mdb.collection.Remove(query_id)
+}
+
 func (mdb *MongoDatabase) Save(mquery interface{}) string {
 	mdoc := mquery.(map[string]interface{})
 
@@ -64,11 +69,11 @@ func (mdb *MongoDatabase) Query(query interface{}) []MapItem {
 		if ok {
 			query = nil
 		} else {
-  		query_map := query.(map[string]interface{})
-	  	for qk := range query_map {
-		  	if qk != "id" && qk != "_id" {
-			  	mdoc[qk] = query_map[qk]
-			  }
+			query_map := query.(map[string]interface{})
+			for qk := range query_map {
+				if qk != "id" && qk != "_id" {
+					mdoc[qk] = query_map[qk]
+				}
 			}
 		}
 	}
@@ -113,9 +118,9 @@ func (mdb *MongoDatabase) Count(query interface{}) int {
 		if ok {
 			query = nil
 		} else {
-  		mdoc := query.(map[string]interface{})
-	  	for key := range mdoc {
-		  	mquery[key] = mdoc[key]
+			mdoc := query.(map[string]interface{})
+			for key := range mdoc {
+				mquery[key] = mdoc[key]
 			}
 		}
 	}

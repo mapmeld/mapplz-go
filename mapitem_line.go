@@ -13,6 +13,7 @@ type MapItemLine struct {
 	db         MapDatabase
 	path       *geo.Polygon
 	properties map[string]interface{}
+	deleted    bool
 }
 
 func NewMapItemLine(latlngs [][]float64, db MapDatabase) *MapItemLine {
@@ -21,7 +22,7 @@ func NewMapItemLine(latlngs [][]float64, db MapDatabase) *MapItemLine {
 		linepts = append(linepts, geo.NewPoint(latlngs[i][0], latlngs[i][1]))
 	}
 	line := geo.NewPolygon(linepts)
-	return &MapItemLine{path: line, properties: make(map[string]interface{}), db: db}
+	return &MapItemLine{path: line, properties: make(map[string]interface{}), db: db, deleted: false}
 }
 
 func (mip *MapItemLine) Type() string {
@@ -160,6 +161,18 @@ func (mip *MapItemLine) Save() {
 			}
 		}
 	}
+}
+
+func (mip *MapItemLine) Delete() {
+	mip.deleted = true
+	if mip.db != nil && mip.id != "" {
+		// delete MapItem
+		mip.db.Delete(mip.id)
+	}
+}
+
+func (mip *MapItemLine) Deleted() bool {
+	return mip.deleted
 }
 
 func (mip *MapItemLine) DistanceFrom(center []float64) float64 {

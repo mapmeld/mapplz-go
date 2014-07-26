@@ -25,6 +25,11 @@ func (psql *PSQLDatabase) QueryRow(sql string) string {
 	return fmt.Sprintf("%v", id)
 }
 
+func (psql *PSQLDatabase) Delete(id string) {
+	sql := "DELETE from mapplz WHERE id = " + id
+	psql.QueryRow(sql)
+}
+
 func (psql *PSQLDatabase) Save(sql interface{}) string {
 	return psql.QueryRow(sql.(string))
 }

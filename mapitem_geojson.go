@@ -43,7 +43,9 @@ func (mp *MapPLZ) ToGeoJson() string {
 	}
 	var features = []string{}
 	for i := 0; i < len(mp.MapItems); i++ {
-		features = append(features, mp.MapItems[i].ToGeoJson())
+		if !mp.MapItems[i].Deleted() {
+			features = append(features, mp.MapItems[i].ToGeoJson())
+		}
 	}
 	return `{"type":"FeatureCollection","features":[` + strings.Join(features, ",") + `]}`
 }
