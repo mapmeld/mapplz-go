@@ -59,10 +59,16 @@ func (mdb *MongoDatabase) Save(mquery interface{}) string {
 func (mdb *MongoDatabase) Query(query interface{}) []MapItem {
 	mdoc := bson.M{}
 	if query != nil {
-		query_map := query.(map[string]interface{})
-		for qk := range query_map {
-			if qk != "id" && qk != "_id" {
-				mdoc[qk] = query_map[qk]
+		// support empty string query
+		_, ok := query.(string)
+		if ok {
+			query = nil
+		} else {
+  		query_map := query.(map[string]interface{})
+	  	for qk := range query_map {
+		  	if qk != "id" && qk != "_id" {
+			  	mdoc[qk] = query_map[qk]
+			  }
 			}
 		}
 	}
@@ -102,9 +108,15 @@ func (mdb *MongoDatabase) Count(query interface{}) int {
 	mquery := bson.M{}
 
 	if query != nil {
-		mdoc := query.(map[string]interface{})
-		for key := range mdoc {
-			mquery[key] = mdoc[key]
+		// support empty string query
+		_, ok := query.(string)
+		if ok {
+			query = nil
+		} else {
+  		mdoc := query.(map[string]interface{})
+	  	for key := range mdoc {
+		  	mquery[key] = mdoc[key]
+			}
 		}
 	}
 

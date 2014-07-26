@@ -19,7 +19,7 @@ func TestSaveToMongo(t *testing.T) {
 	mapstore.Database = NewMongoDatabase(collection)
 
 	mapstore.Add2(40.1, -70.2)
-	pt := mapstore.Query(nil)[0]
+	pt := mapstore.Query("")[0]
 	if pt.Lat() != 40.1 || pt.Lng() != -70.2 {
 		t.Errorf("did not return point from MongoDB")
 	}
@@ -40,7 +40,7 @@ func TestMongoCount(t *testing.T) {
 	mapstore.Add3(40.1, -70.2, `{ "color": "red" }`)
 	mapstore.Add3(40.1, -70.2, `{ "color": "blue" }`)
 
-	if mapstore.Count(nil) != 2 {
+	if mapstore.Count("") != 2 {
 		t.Errorf("did not count MongoDB points")
 	}
 
@@ -88,7 +88,7 @@ func TestMongoUpdate(t *testing.T) {
 
 	pt := mapstore.Add2(40.1, -70.2)
 
-	pt = mapstore.Query(nil)[0]
+	pt = mapstore.Query("")[0]
 	if pt.Lat() != 40.1 || pt.Lng() != -70.2 {
 		t.Errorf("did not return point from MongoDB")
 	}
@@ -97,11 +97,11 @@ func TestMongoUpdate(t *testing.T) {
 	props["color"] = "red"
 	pt.SetProperties(props)
 
-	if mapstore.Count(nil) != 1 {
+	if mapstore.Count("") != 1 {
 		t.Errorf("did not keep to a single MongoDB point")
 	}
 
-	pt = mapstore.Query(nil)[0]
+	pt = mapstore.Query("")[0]
 	if pt.Properties()["color"] != "red" {
 		t.Errorf("did not update property in MongoDB")
 	}

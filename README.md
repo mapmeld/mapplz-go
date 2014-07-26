@@ -56,12 +56,19 @@ line.Type() == "line"
 line.Path() == [[[40, -70], [50, 20]]]
 line.Properties()["color"]
 
+mapstore.ToGeoJson() // export all as GeoJSON
 mapstore.Count("") == 2  // MapItems count ("" selects all)
 mapstore.Query("") // array of all MapItems ("" selects all)
-mapstore.ToGeoJson() // export all as GeoJSON
 
-// currently unsupported without PostGIS
-mapstore.Where("color = 'red'") // enter a SQL WHERE clause
+// supported with PostGIS
+mapstore.Where("color = 'red'") // enter a SQL WHERE clause with one property
+mapstore.Count("color = 'white' OR color = 'blue'")
+
+// supported with MongoDB
+query = make(map[string]interface{})
+query["color"] = "red"
+mapstore.Query(query)
+mapstore.Count(query)
 ```
 
 You can make some geospatial queries:
@@ -102,11 +109,12 @@ mapstore.Database = NewPostGISDB(db)
 #### MongoDB
 
 ```
-// MongoDB puts a geospatial index on 'geo' and stores other fields in 'props'
+// install MongoDB and create a db and collection
 mapstore := NewMapPLZ()
 session, err := mgo.Dial("localhost")
 defer session.Close()
 collection := session.DB("sample").C("mapplz")
+// put a geospatial index on 'geo.geometry'
 geoindex := mgo.Index{Key: []string{"$2dsphere:geo.geometry"}, Bits: 26}
 collection.EnsureIndex(geoindex)
 mapstore.Database = NewMongoDatabase(collection)
