@@ -397,7 +397,7 @@ func (mp *MapPLZ) Count(query interface{}) int {
 	if mp.Database != nil {
 		return mp.Database.Count(query)
 	} else {
-		return len(mp.NotNil(mp.MapItems))
+		return len(mp.Query(query))
 	}
 }
 
@@ -405,7 +405,19 @@ func (mp *MapPLZ) Query(query interface{}) []MapItem {
 	if mp.Database != nil {
 		return mp.Database.Query(query)
 	} else {
-		return mp.NotNil(mp.MapItems)
+		notnilitems := mp.NotNil(mp.MapItems)
+		if query != nil && query != "" {
+			conditions := query.(map[string]interface{})
+			for qk := range conditions {
+				for i := 0; i < len(notnilitems); i++ {
+					if notnilitems[i].Properties()[qk] != conditions[qk] {
+  					notnilitems[i] = nil
+					}
+				}
+				notnilitems = mp.NotNil(notnilitems)
+			}
+		}
+		return notnilitems
 	}
 }
 
@@ -416,7 +428,7 @@ func (mp *MapPLZ) Where(query interface{}) []MapItem {
 func (mp *MapPLZ) NotNil(items []MapItem) []MapItem {
 	var response []MapItem
 	for i := 0; i < len(items); i++ {
-		if !items[i].Deleted() {
+		if items[i] != nil && !items[i].Deleted() {
 			response = append(response, items[i])
 		}
 	}

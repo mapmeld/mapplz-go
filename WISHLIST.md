@@ -9,15 +9,9 @@
 
 ## Formats
 
-* Input a CSV or GeoJSON file
 * Input a CSV string
-* Input a Shapefile that needs ogr2ogr conversion
 * Input MapPLZ language
 * Export HTML+JS Leaflet map
-
-## No DB
-
-* Query by property (map[string]interface{})
 
 ## PostGIS
 

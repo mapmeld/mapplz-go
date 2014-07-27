@@ -71,7 +71,7 @@ mapstore.Where("color = 'red'") // enter a SQL WHERE clause with one property
 mapstore.Count("color = 'white' OR color = 'blue'")
 item.Delete()
 
-// supported with MongoDB
+// supported with MongoDB or without DB
 query = make(map[string]interface{})
 query["color"] = "red"
 mapstore.Query(query)

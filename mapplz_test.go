@@ -244,6 +244,20 @@ func TestGeojsonAllExport(t *testing.T) {
 	}
 }
 
+func TestNoDBWhere(t *testing.T) {
+	mapstore := NewMapPLZ()
+	mapstore.Add3(40.1, -70.2, `{ "color": "red" }`)
+	mapstore.Add3(40.2, -70.3, `{ "color": "blue" }`)
+
+	mquery := make(map[string]interface{})
+	mquery["color"] = "blue"
+	pts := mapstore.Where(mquery)
+	pt := pts[0]
+	if len(pts) != 1 || pt.Lat() != 40.2 || pt.Lng() != -70.3 {
+		t.Errorf("did not filter points in Where")
+	}
+}
+
 func TestWithin(t *testing.T) {
 	mapstore := NewMapPLZ()
 	mapstore.Add2(40.1, -70.2)
