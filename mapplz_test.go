@@ -58,6 +58,18 @@ func TestLatLngProperties(t *testing.T) {
 	}
 }
 
+func TestLatLngPropertiesMap(t *testing.T) {
+	mapstore := NewMapPLZ()
+	props := make(map[string]interface{})
+	props["lat"] = 40
+	props["lng"] = -70
+	props["color"] = "red"
+	pt := mapstore.Add(props)
+	if pt.Lat() != 40 || pt.Properties()["color"] != "red" {
+		t.Errorf("pt property not set")
+	}
+}
+
 func TestLngLatJson(t *testing.T) {
 	mapstore := NewMapPLZ()
 	pt := mapstore.Add_Lng_Lat_Json(-70, 40, `{ "color": "#f00" }`)

@@ -3,18 +3,21 @@
 ## Go Lang
 
 * Use better function names
-* Ask community for feedback
 * Separate out testing of different types
 * Handle and pass along a massive amount of errors
-* Is there a way to install all dependencies?
+* Is there a way to install all dependencies in one go?
 
 ## Formats
 
-* Always return an array of MapItems (or maybe singleton if there's only one)
+* Input a CSV or GeoJSON file
+* Input a CSV string
+* Input a Shapefile that needs ogr2ogr conversion
+* Input MapPLZ language
+* Export HTML+JS Leaflet map
 
 ## No DB
 
-* Query by property
+* Query by property (map[string]interface{})
 
 ## PostGIS
 

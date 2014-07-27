@@ -39,6 +39,12 @@ mapstore.Add(`{ "type": "Feature", "geometry": { "type": "Point", "coordinates":
 // add properties
 mapstore.Add2([]float64{40, -70}, `{ "color": "red" }`)
 mapstore.Add(`{ "type": "Feature", "geometry": { "type": "LineString", "coordinates": [[-70, 40], [-80, 50]] }, "properties": { "color": "#0f0" }}`)
+
+props := make(map[string]interface{})
+props["lat"] = 40
+props["lng"] = -70
+props["property"] = "test"
+mapstore.Add(props)
 ```
 
 Each feature is added to the mapstore and returned as a MapItem

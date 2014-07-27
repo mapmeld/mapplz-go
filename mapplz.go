@@ -73,8 +73,27 @@ func (mp *MapPLZ) Add(input interface{}) MapItem {
 	} else {
 		arr, ok := input.([]interface{})
 		if ok && len(arr) > 2 {
-			lat := arr[0].(float64)
-			lng := arr[1].(float64)
+			var lat float64
+			var lng float64
+			var lat_int int
+			var lng_int int
+
+			lat_set, ok := arr[0].(float64)
+			if !ok {
+				lat_int, ok = arr[0].(int)
+				lat = float64(lat_int)
+			} else {
+				lat = lat_set
+			}
+
+			lng_set, ok2 := arr[1].(float64)
+			if !ok2 {
+				lng_int, ok2 = arr[1].(int)
+				lng = float64(lng_int)
+			} else {
+				lng = lng_set
+			}
+
 			props, ok := arr[2].(string)
 			if ok {
 				return mp.Add_Lat_Lng_Json(lat, lng, props)
@@ -83,8 +102,42 @@ func (mp *MapPLZ) Add(input interface{}) MapItem {
 				return mp.Add_Lat_Lng_Properties(lat, lng, props)
 			}
 		} else {
-			latlng := input.([]float64)
-			return mp.Add_LatLng(latlng)
+			latlng, ok := input.([]float64)
+			if ok {
+  			return mp.Add_LatLng(latlng)
+			} else {
+				props := input.(map[string]interface{})
+				if props["lat"] != nil && props["lng"] != nil {
+					var lat float64
+					var lng float64
+					var lat_int int
+					var lng_int int
+
+					lat_set, ok := props["lat"].(float64)
+					if !ok {
+						lat_int, ok = props["lat"].(int)
+						lat = float64(lat_int)
+					} else {
+						lat = lat_set
+					}
+
+					lng_set, ok2 := props["lng"].(float64)
+					if !ok2 {
+						lng_int, ok2 = props["lng"].(int)
+						lng = float64(lng_int)
+					} else {
+						lng = lng_set
+					}
+
+					return mp.Add_Lat_Lng_Properties(lat, lng, props)
+				} else {
+					if props["path"] != nil {
+						return mp.Add_LatLngPath_Properties(props["path"].([][]float64), props)
+					} else {
+						return nil
+					}
+				}
+			}
 		}
 	}
 }
