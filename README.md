@@ -97,6 +97,18 @@ pt.Within([][]float64{{40, -70}, {40, -110}, {60, -90}, {40, -70}})
 pt.DistanceFrom([]float64{lat, lng})
 ```
 
+## Instant Interactive Maps
+
+Get the HTML and JavaScript code to display your data on a map:
+
+```
+// HTML embed code
+mapstore.EmbedHtml()
+
+// full HTML page (including head, body, stylesheet)
+mapstore.RenderHtml()
+```
+
 ## Databases
 
 MapPLZ can set up geospatial data with PostGIS or MongoDB, and take the complexities out of your hands.

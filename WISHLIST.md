@@ -9,9 +9,8 @@
 
 ## Formats
 
-* Input a CSV string
+* Input a CSV string? Encoding/CSV reads files directly
 * Input MapPLZ language
-* Export HTML+JS Leaflet map
 
 ## PostGIS
 

@@ -304,3 +304,9 @@ func TestDelete(t *testing.T) {
 		t.Errorf("did not delete point from nodb MapItems")
 	}
 }
+
+func TestRender(t *testing.T) {
+	mapstore := NewMapPLZ()
+	mapstore.Add_Lng_Lat(-70, 40)
+	// t.Errorf("%v", mapstore.RenderHtml())
+}

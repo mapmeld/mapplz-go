@@ -2,6 +2,7 @@ package mapplz
 
 import (
 	"encoding/json"
+	"fmt"
 	gj "github.com/mapmeld/geojson-bson"
 	"sort"
 )
@@ -104,7 +105,7 @@ func (mp *MapPLZ) Add(input interface{}) MapItem {
 		} else {
 			latlng, ok := input.([]float64)
 			if ok {
-  			return mp.Add_LatLng(latlng)
+				return mp.Add_LatLng(latlng)
 			} else {
 				props := input.(map[string]interface{})
 				if props["lat"] != nil && props["lng"] != nil {
@@ -411,7 +412,7 @@ func (mp *MapPLZ) Query(query interface{}) []MapItem {
 			for qk := range conditions {
 				for i := 0; i < len(notnilitems); i++ {
 					if notnilitems[i].Properties()[qk] != conditions[qk] {
-  					notnilitems[i] = nil
+						notnilitems[i] = nil
 					}
 				}
 				notnilitems = mp.NotNil(notnilitems)
@@ -480,4 +481,66 @@ func (mp *MapPLZ) Near(center interface{}, count int) []MapItem {
 		sort.Sort(bydistance)
 		return bydistance.MIV[0:count]
 	}
+}
+
+func (mp *MapPLZ) EmbedHtml() string {
+	embed_code := `<div id='map'></div>
+<link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+<script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+<script type="text/javascript">
+var map = L.map("map");`
+
+	items := mp.Query(nil)
+	for i := 0; i < len(items); i++ {
+		clickable := items[i].Properties()["label"]
+		if clickable == nil {
+			clickable = items[i].Properties()["popup"]
+		}
+		if items[i].Type() == "point" {
+			lat := items[i].Lat()
+			lng := items[i].Lng()
+			if clickable != nil {
+				embed_code += fmt.Sprintf("L.marker([%v, %v]).bindPopup('%v').addTo(map);\n", lat, lng, clickable)
+			} else {
+				embed_code += fmt.Sprintf("L.marker([%v, %v], { clickable: false }).addTo(map);\n", lat, lng)
+			}
+		} else if items[i].Type() == "line" {
+			path := items[i].Path()[0]
+			if clickable != nil {
+				embed_code += fmt.Sprintf("L.polyline(%v, { clickable: true }).bindPopup('%v').addTo(map);\n", path, clickable)
+			} else {
+				embed_code += fmt.Sprintf("L.polyline(%v).addTo(map);\n", path)
+			}
+		} else if items[i].Type() == "polygon" {
+			path := items[i].Path()
+			if clickable != nil {
+				embed_code += fmt.Sprintf("L.polygon(%v, { clickable: true }).bindPopup('%v').addTo(map);\n", path, clickable)
+			} else {
+				embed_code += fmt.Sprintf("L.polygon(%v).addTo(map);\n", path)
+			}
+		}
+	}
+	embed_code += "</script>\n"
+	return embed_code
+}
+
+func (mp *MapPLZ) RenderHtml() string {
+	embed := mp.EmbedHtml()
+	html := `<!DOCTYPE html>
+<html>
+<head>
+  <style type="text/css">
+	html, body, #map {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	</style>
+</head>
+<body>`
+	html += embed
+	html += `</body>
+</html>`
+	return html
 }
