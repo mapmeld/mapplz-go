@@ -19,7 +19,7 @@ to Add_Lng_Lat, and send an array [lat, lng] to Add_LatLng.
 
 Adding some data:
 
-```
+```go
 mapstore := mapplz.NewMapPLZ()
 
 // add points
