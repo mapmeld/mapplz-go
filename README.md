@@ -49,7 +49,7 @@ mapstore.Add(props)
 
 Each feature is added to the mapstore and returned as a MapItem
 
-```
+```go
 pt := mapstore.Add_Lat_Lng(40, -70)
 pt.SetJsonProperties(`{ "color": "#00f" }`)
 pt.SetProperties(map[string]interface{})
@@ -81,7 +81,7 @@ item.Delete()
 
 You can make some geospatial queries:
 
-```
+```go
 // all MapItems inside this area
 mapstore.Within(`{ "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [[[ ... ]]] } }`)
 mapstore.Within([][]float64{{40, -70}, {40, -110}, {60, -90}, {40, -70}})
@@ -101,7 +101,7 @@ pt.DistanceFrom([]float64{lat, lng})
 
 Get the HTML and JavaScript code to display your data on a map:
 
-```
+```go
 // HTML embed code
 mapstore.EmbedHtml()
 
@@ -116,7 +116,7 @@ MapPLZ can set up geospatial data with PostGIS or MongoDB, and take the complexi
 Here's how you can connect:
 
 #### PostGIS
-```
+```go
 // install PostGIS and create a 'mapplz' table before use
 // here's my schema:
 // CREATE TABLE mapplz (id SERIAL PRIMARY KEY, properties JSON, geom public.geometry)
@@ -128,7 +128,7 @@ mapstore.Database = NewPostGISDB(db)
 
 #### MongoDB
 
-```
+```go
 // install MongoDB and create a db and collection
 mapstore := NewMapPLZ()
 session, err := mgo.Dial("localhost")
